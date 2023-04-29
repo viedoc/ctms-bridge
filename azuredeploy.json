@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.16.2.56959",
-      "templateHash": "13806026621101212886"
+      "templateHash": "14994569053978627081"
     }
   },
   "parameters": {
@@ -68,7 +68,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.16.2.56959",
-              "templateHash": "7468864738447256123"
+              "templateHash": "4378808406254068554"
             }
           },
           "parameters": {
@@ -170,7 +170,7 @@
               "properties": {
                 "Application_Type": "web",
                 "RetentionInDays": 90,
-                "IngestionMode": "ApplicationInsights",
+                "IngestionMode": "LogAnalytics",
                 "publicNetworkAccessForIngestion": "Enabled",
                 "publicNetworkAccessForQuery": "Enabled"
               }
@@ -281,7 +281,7 @@
               "type": "string",
               "value": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
             },
-            "url": {
+            "defaultHostName": {
               "type": "string",
               "value": "[reference(resourceId('Microsoft.Web/sites', parameters('functionAppName')), '2022-09-01').defaultHostName]"
             }
@@ -308,7 +308,7 @@
     },
     "url": {
       "type": "string",
-      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('{0}infrastructure-module', variables('prefix'))), '2022-09-01').outputs.url.value]"
+      "value": "[format('https://{0}', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('{0}infrastructure-module', variables('prefix'))), '2022-09-01').outputs.defaultHostName.value)]"
     }
   }
 }
