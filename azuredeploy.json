@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.16.2.56959",
-      "templateHash": "14994569053978627081"
+      "templateHash": "14510473098403252544"
     }
   },
   "parameters": {
@@ -24,6 +24,7 @@
     "defaultName": "[format('{0}{1}', variables('prefix'), variables('random'))]",
     "storageAccountName": "[take(toLower(replace(format('{0}', variables('defaultName')), '-', '')), 23)]",
     "fileShareName": "data",
+    "workspaceName": "[format('{0}-log-analytics', variables('defaultName'))]",
     "applicationInsightsName": "[format('{0}-insights', variables('defaultName'))]",
     "functionAppName": "[variables('defaultName')]"
   },
@@ -51,6 +52,9 @@
           "fileShareName": {
             "value": "[variables('fileShareName')]"
           },
+          "workspaceName": {
+            "value": "[variables('workspaceName')]"
+          },
           "applicationInsightsName": {
             "value": "[variables('applicationInsightsName')]"
           },
@@ -68,7 +72,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.16.2.56959",
-              "templateHash": "4378808406254068554"
+              "templateHash": "8430829695053839913"
             }
           },
           "parameters": {
@@ -80,6 +84,9 @@
               "type": "string"
             },
             "fileShareName": {
+              "type": "string"
+            },
+            "workspaceName": {
               "type": "string"
             },
             "applicationInsightsName": {
@@ -162,6 +169,17 @@
               ]
             },
             {
+              "type": "Microsoft.OperationalInsights/workspaces",
+              "apiVersion": "2020-10-01",
+              "name": "[parameters('workspaceName')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "sku": {
+                  "name": "Free"
+                }
+              }
+            },
+            {
               "type": "Microsoft.Insights/components",
               "apiVersion": "2020-02-02",
               "name": "[parameters('applicationInsightsName')]",
@@ -171,9 +189,13 @@
                 "Application_Type": "web",
                 "RetentionInDays": 90,
                 "IngestionMode": "LogAnalytics",
+                "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]",
                 "publicNetworkAccessForIngestion": "Enabled",
                 "publicNetworkAccessForQuery": "Enabled"
-              }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]"
+              ]
             },
             {
               "type": "Microsoft.Web/sites",
