@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.16.2.56959",
-      "templateHash": "2785704983392689309"
+      "templateHash": "13806026621101212886"
     }
   },
   "parameters": {
@@ -24,7 +24,7 @@
     "defaultName": "[format('{0}{1}', variables('prefix'), variables('random'))]",
     "storageAccountName": "[take(toLower(replace(format('{0}', variables('defaultName')), '-', '')), 23)]",
     "fileShareName": "data",
-    "applicationInsightsName": "[format('{0}insights', variables('defaultName'))]",
+    "applicationInsightsName": "[format('{0}-insights', variables('defaultName'))]",
     "functionAppName": "[variables('defaultName')]"
   },
   "resources": [
@@ -68,7 +68,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.16.2.56959",
-              "templateHash": "509060758234811841"
+              "templateHash": "7468864738447256123"
             }
           },
           "parameters": {
@@ -198,7 +198,13 @@
                   "alwaysOn": false,
                   "http20Enabled": true,
                   "functionAppScaleLimit": 2,
-                  "minimumElasticInstanceCount": 0
+                  "minimumElasticInstanceCount": 0,
+                  "appSettings": [
+                    {
+                      "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                      "value": "[reference(resourceId('Microsoft.Insights/components', parameters('applicationInsightsName')), '2020-02-02').ConnectionString]"
+                    }
+                  ]
                 },
                 "scmSiteAlsoStopped": false,
                 "clientAffinityEnabled": false,
@@ -209,7 +215,10 @@
                 "redundancyMode": "None",
                 "storageAccountRequired": false,
                 "keyVaultReferenceIdentity": "SystemAssigned"
-              }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Insights/components', parameters('applicationInsightsName'))]"
+              ]
             },
             {
               "type": "Microsoft.Web/sites/config",
