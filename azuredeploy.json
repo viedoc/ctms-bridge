@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.16.2.56959",
-      "templateHash": "1517272070862912328"
+      "templateHash": "10291524470538410876"
     }
   },
   "parameters": {
@@ -68,7 +68,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.16.2.56959",
-              "templateHash": "16504063023814693351"
+              "templateHash": "873707998699067910"
             }
           },
           "parameters": {
@@ -195,7 +195,7 @@
                 "siteConfig": {
                   "numberOfWorkers": 1,
                   "acrUseManagedIdentityCreds": false,
-                  "alwaysOn": true,
+                  "alwaysOn": false,
                   "http20Enabled": true,
                   "functionAppScaleLimit": 2,
                   "minimumElasticInstanceCount": 0
@@ -224,7 +224,7 @@
                 "detailedErrorLoggingEnabled": false,
                 "use32BitWorkerProcess": false,
                 "webSocketsEnabled": false,
-                "alwaysOn": true,
+                "alwaysOn": false,
                 "loadBalancing": "LeastRequests",
                 "autoHealEnabled": false,
                 "vnetRouteAllEnabled": false,
