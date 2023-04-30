@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.16.2.56959",
-      "templateHash": "1550499619869150335"
+      "templateHash": "9921282524557045367"
     }
   },
   "parameters": {
@@ -26,6 +26,7 @@
     "fileShareName": "data",
     "workspaceName": "[format('{0}-log-analytics', variables('defaultName'))]",
     "applicationInsightsName": "[format('{0}-insights', variables('defaultName'))]",
+    "appServicePlanName": "[format('{0}-farm', variables('defaultName'))]",
     "functionAppName": "[variables('defaultName')]"
   },
   "resources": [
@@ -61,6 +62,9 @@
           "location": {
             "value": "[parameters('location')]"
           },
+          "appServicePlanName": {
+            "value": "[variables('appServicePlanName')]"
+          },
           "functionAppName": {
             "value": "[variables('functionAppName')]"
           }
@@ -72,7 +76,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.16.2.56959",
-              "templateHash": "13621045573678471482"
+              "templateHash": "11966010075004316354"
             }
           },
           "parameters": {
@@ -90,6 +94,9 @@
               "type": "string"
             },
             "applicationInsightsName": {
+              "type": "string"
+            },
+            "appServicePlanName": {
               "type": "string"
             },
             "functionAppName": {
@@ -198,15 +205,29 @@
               ]
             },
             {
+              "type": "Microsoft.Web/serverfarms",
+              "apiVersion": "2022-09-01",
+              "name": "[parameters('appServicePlanName')]",
+              "location": "[parameters('location')]",
+              "kind": "linux",
+              "properties": {
+                "reserved": true
+              },
+              "sku": {
+                "name": "F1"
+              }
+            },
+            {
               "type": "Microsoft.Web/sites",
               "apiVersion": "2022-09-01",
               "name": "[parameters('functionAppName')]",
               "location": "[parameters('location')]",
-              "kind": "functionapp,linux",
+              "kind": "functionapplinux",
               "identity": {
                 "type": "SystemAssigned"
               },
               "properties": {
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]",
                 "enabled": true,
                 "reserved": true,
                 "isXenon": false,
@@ -225,6 +246,54 @@
                     {
                       "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
                       "value": "[reference(resourceId('Microsoft.Insights/components', parameters('applicationInsightsName')), '2020-02-02').ConnectionString]"
+                    },
+                    {
+                      "name": "AzureWebJobsStorage",
+                      "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2022-09-01').keys[1].value]"
+                    },
+                    {
+                      "name": "FUNCTIONS_EXTENSION_VERSION",
+                      "value": "~4"
+                    },
+                    {
+                      "name": "FUNCTIONS_WORKER_RUNTIME",
+                      "value": "dotnet-isolated"
+                    },
+                    {
+                      "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+                      "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2022-09-01').keys[1].value]"
+                    },
+                    {
+                      "name": "WEBSITE_CONTENTSHARE",
+                      "value": "[parameters('functionAppName')]"
+                    },
+                    {
+                      "name": "WEBSITE_MOUNT_ENABLED",
+                      "value": "1"
+                    },
+                    {
+                      "name": "WEBSITE_RUN_FROM_PACKAGE",
+                      "value": "https://viedocctmsbridge5ivno35.blob.core.windows.net/releases/viedoc-ctms-bridge-20230430080635.zip?sp=r&st=2023-04-30T06:20:25Z&se=2023-05-02T14:20:25Z&spr=https&sv=2021-12-02&sr=b&sig=ke0Z9HXSMMsr4X%2BfSN3HF2VMjtKNUSgmx42zNonWgEI%3D"
+                    },
+                    {
+                      "name": "AppSettingsFile",
+                      "value": "appsettings.json"
+                    },
+                    {
+                      "name": "ExportBasePath",
+                      "value": "/data"
+                    },
+                    {
+                      "name": "ExportConsoleExecutable",
+                      "value": "Viedoc.Export.Console"
+                    },
+                    {
+                      "name": "ExportConsoleExecutableFolder",
+                      "value": "console"
+                    },
+                    {
+                      "name": "MappingsFolder",
+                      "value": "mappings"
                     }
                   ]
                 },
@@ -239,7 +308,9 @@
                 "keyVaultReferenceIdentity": "SystemAssigned"
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Insights/components', parameters('applicationInsightsName'))]"
+                "[resourceId('Microsoft.Insights/components', parameters('applicationInsightsName'))]",
+                "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
               ]
             },
             {
