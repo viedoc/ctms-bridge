@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.16.2.56959",
-      "templateHash": "9921282524557045367"
+      "templateHash": "14147823012796740300"
     }
   },
   "parameters": {
@@ -76,7 +76,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.16.2.56959",
-              "templateHash": "11966010075004316354"
+              "templateHash": "6048711444117532204"
             }
           },
           "parameters": {
@@ -261,7 +261,7 @@
                     },
                     {
                       "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
-                      "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2022-09-01').keys[1].value]"
+                      "value": "DefaultEndpointsProtocol=https;AccountName=viedocctmsbridge5ivno35;AccountKey=yrmHY2iAbrICBEPibIcKc1Geow5f7c+y7m7zet0K+z+qsABbQmIJd7noloD+ucuovBgjtuMfEslA+AStNez3UA==;EndpointSuffix=core.windows.net"
                     },
                     {
                       "name": "WEBSITE_CONTENTSHARE",
