@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.16.2.56959",
-      "templateHash": "823196971878595463"
+      "templateHash": "12056687223234118119"
     }
   },
   "parameters": {
@@ -76,7 +76,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.16.2.56959",
-              "templateHash": "12620298532761410071"
+              "templateHash": "10108418022456303762"
             }
           },
           "parameters": {
@@ -249,7 +249,7 @@
                     },
                     {
                       "name": "AzureWebJobsStorage",
-                      "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2022-09-01').keys[1].value]"
+                      "value": "[format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', parameters('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2022-09-01').keys[1].value)]"
                     },
                     {
                       "name": "FUNCTIONS_EXTENSION_VERSION",
@@ -261,7 +261,7 @@
                     },
                     {
                       "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
-                      "value": "DefaultEndpointsProtocol=https;AccountName=viedocctmsbridge5ivno35;AccountKey=yrmHY2iAbrICBEPibIcKc1Geow5f7c+y7m7zet0K+z+qsABbQmIJd7noloD+ucuovBgjtuMfEslA+AStNez3UA==;EndpointSuffix=core.windows.net"
+                      "value": "[format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', parameters('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2022-09-01').keys[1].value)]"
                     },
                     {
                       "name": "WEBSITE_CONTENTSHARE",
