@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.16.2.56959",
-      "templateHash": "32525527929227196"
+      "templateHash": "16155135766498747520"
     }
   },
   "parameters": {
@@ -76,7 +76,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.16.2.56959",
-              "templateHash": "5943711360057773812"
+              "templateHash": "7900110848091354303"
             }
           },
           "parameters": {
@@ -276,7 +276,7 @@
                     },
                     {
                       "name": "WEBSITE_RUN_FROM_PACKAGE",
-                      "value": "https://viedocctmsbridge5ivno35.blob.core.windows.net/releases/viedoc-ctms-bridge-20230430080635.zip?sp=r&st=2023-04-30T06:20:25Z&se=2023-05-02T14:20:25Z&spr=https&sv=2021-12-02&sr=b&sig=ke0Z9HXSMMsr4X%2BfSN3HF2VMjtKNUSgmx42zNonWgEI%3D"
+                      "value": "https://github.com/viedoc/ctms-bridge/releases/download/0.0.1/viedoc-ctms-bridge-20230501064054.zip"
                     },
                     {
                       "name": "AppSettingsFile",
@@ -292,7 +292,7 @@
                     },
                     {
                       "name": "ExportConsoleExecutableFolder",
-                      "value": "console"
+                      "value": "viedoc.export.console"
                     },
                     {
                       "name": "MappingsFolder",
