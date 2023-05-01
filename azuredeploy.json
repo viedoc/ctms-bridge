@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.16.2.56959",
-      "templateHash": "2990503154316544487"
+      "templateHash": "6141271441786823453"
     }
   },
   "parameters": {
@@ -76,7 +76,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.16.2.56959",
-              "templateHash": "4712917200442344325"
+              "templateHash": "270786173795205761"
             }
           },
           "parameters": {
@@ -388,7 +388,7 @@
                     "secureValue": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2022-09-01').keys[1].value]"
                   }
                 ],
-                "scriptContent": "    Invoke-WebRequest \"https://github.com/viedoc/ctms-bridge/releases/download/0.0.1/viedoc.export.console-0.0.1-linux.zip\" -OutFile \"viedoc.export.console.zip\"\r\n    Expand-Archive -Path \"viedoc.export.console.zip\" -DestinationPath \".\" -Force\r\n    az version\r\n    "
+                "scriptContent": "    Invoke-WebRequest \"https://github.com/viedoc/ctms-bridge/releases/download/0.0.1/viedoc.export.console-0.0.1-linux.zip\" -OutFile \"viedoc.export.console.zip\"\r\n    Expand-Archive -Path \"viedoc.export.console.zip\" -DestinationPath \".\" -Force\r\n    curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash\r\n    az version\r\n    "
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', parameters('storageAccountName'), 'default', parameters('fileShareName'))]",
