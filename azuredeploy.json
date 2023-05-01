@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.16.2.56959",
-      "templateHash": "4245022744958001460"
+      "templateHash": "10918326902362963100"
     }
   },
   "parameters": {
@@ -76,7 +76,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.16.2.56959",
-              "templateHash": "11402224115171404789"
+              "templateHash": "16639899018859566524"
             }
           },
           "parameters": {
@@ -372,9 +372,9 @@
               "apiVersion": "2020-10-01",
               "name": "deployscript-upload-blob",
               "location": "[parameters('location')]",
-              "kind": "AzureCLI",
+              "kind": "AzurePowerShell",
               "properties": {
-                "azCliVersion": "2.47.0",
+                "azPowerShellVersion": "3",
                 "timeout": "PT5M",
                 "retentionInterval": "PT1H",
                 "cleanupPreference": "OnSuccess",
@@ -388,7 +388,7 @@
                     "secureValue": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2022-09-01').keys[1].value]"
                   }
                 ],
-                "primaryScriptUri": "https://github.com/viedoc/ctms-bridge/releases/download/0.0.1/upload-export-application.ps1"
+                "scriptContent": "    Invoke-WebRequest \"https://github.com/viedoc/ctms-bridge/releases/download/0.0.1/viedoc.export.console-0.0.1-linux.zip\" -OutFile \"viedoc.export.console.zip\"\r\n    Expand-Archive -Path \"viedoc.export.console.zip\" -DestinationPath \".\" -Force\r\n    az version\r\n    "
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', parameters('storageAccountName'), 'default', parameters('fileShareName'))]",
