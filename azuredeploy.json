@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.16.2.56959",
-      "templateHash": "10918326902362963100"
+      "templateHash": "2990503154316544487"
     }
   },
   "parameters": {
@@ -76,7 +76,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.16.2.56959",
-              "templateHash": "16639899018859566524"
+              "templateHash": "4712917200442344325"
             }
           },
           "parameters": {
@@ -374,7 +374,7 @@
               "location": "[parameters('location')]",
               "kind": "AzurePowerShell",
               "properties": {
-                "azPowerShellVersion": "3",
+                "azPowerShellVersion": "7.0",
                 "timeout": "PT5M",
                 "retentionInterval": "PT1H",
                 "cleanupPreference": "OnSuccess",
