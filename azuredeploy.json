@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.16.2.56959",
-      "templateHash": "10046947144745677765"
+      "templateHash": "1090886006094922798"
     }
   },
   "parameters": {
@@ -76,7 +76,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.16.2.56959",
-              "templateHash": "13426579971038091428"
+              "templateHash": "17450117071933705173"
             }
           },
           "parameters": {
@@ -104,7 +104,6 @@
             }
           },
           "variables": {
-            "$fxv#0": "param (\r\n    [string] $destination, \r\n    [string] $version = \"0.0.1\"\r\n)\r\n\r\n$file = \"viedoc.export.console-$version-linux.zip\"\r\n$zip = \"https://github.com/viedoc/ctms-bridge/releases/download/$version/$file\"\r\n$out = \"viedoc.export.console\"\r\n$destinationPath = \"viedoc.export.console\"\r\n\r\nWrite-Host \"Donwloading zip file ...\"\r\nInvoke-WebRequest $zip -OutFile \"$file\"\r\n\r\nif(Test-Path \"$out\") {\r\n    Write-Host \"Deleting out folder ...\"\r\n    Remove-Item \"$out\" -Recurse -Force -Confirm:$false\r\n}\r\n\r\nWrite-Host \"Expanding archive ...\"\r\nExpand-Archive -Path \"$file\" -DestinationPath \".\" -Force\r\n\r\nWrite-Host \"Upload to file share ...\"\r\naz storage file upload-batch `\r\n--source \"./$out/.\" `\r\n--destination \"$destination\" `\r\n--destination-path \"$destinationPath\" `\r\n--account-key \"$($env:ACCOUNT_KEY)\" \r\n\r\nWrite-Host \"Done\"\r\n",
             "alwaysOn": true
           },
           "resources": [
@@ -385,7 +384,7 @@
                     "secureValue": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2022-09-01').keys[1].value]"
                   }
                 ],
-                "scriptContent": "[variables('$fxv#0')]"
+                "primaryScriptUri": "https://github.com/viedoc/ctms-bridge/releases/download/0.0.1/upload-export-application.ps1"
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
