@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.16.2.56959",
-      "templateHash": "305732287099715888"
+      "templateHash": "4726388155627724667"
     }
   },
   "parameters": {
@@ -76,7 +76,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.16.2.56959",
-              "templateHash": "2332589345909027755"
+              "templateHash": "2722748387791637539"
             }
           },
           "parameters": {
@@ -104,6 +104,7 @@
             }
           },
           "variables": {
+            "$fxv#0": "param (\n    [string] $destination,\n    [string] $version = \"0.0.1\"\n)\n\n$file = \"viedoc.export.console-$version-linux.zip\"\n$zip = \"https://github.com/viedoc/ctms-bridge/releases/download/$version/$file\"\n$out = \"viedoc.export.console\"\n$destinationPath = \"viedoc.export.console\"\n\nWrite-Host \"Donwloading zip file ...\"\nInvoke-WebRequest $zip -OutFile \"$file\"\n\nif(Test-Path \"$out\") {\n    Write-Host \"Deleting out folder ...\"\n    Remove-Item \"$out\" -Recurse -Force -Confirm:$false\n}\n\nWrite-Host \"Expanding archive ...\"\nExpand-Archive -Path \"$file\" -DestinationPath \".\" -Force\n\nWrite-Host \"Upload to file share ...\"\naz storage file upload-batch `\n--source \"./$out/.\" `\n--destination \"$destination\" `\n--destination-path \"$destinationPath\" `\n--account-key \"$($env:ACCOUNT_KEY)\" \n\nWrite-Host \"Done\"\n",
             "alwaysOn": true
           },
           "resources": [
@@ -384,7 +385,7 @@
                     "secureValue": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2022-09-01').keys[1].value]"
                   }
                 ],
-                "scriptContent": "    param (\r\n      [string] $destination, \r\n      [string] $version = \"0.0.1\"\r\n    )\r\n    \r\n    $file = \"viedoc.export.console-$version-linux.zip\"\r\n    $zip = \"https://github.com/viedoc/ctms-bridge/releases/download/$version/$file\"\r\n    $out = \"viedoc.export.console\"\r\n    $destinationPath = \"viedoc.export.console\"\r\n    \r\n    Write-Host \"Donwloading zip file ...\"\r\n    Invoke-WebRequest $zip -OutFile \"$file\"\r\n    \r\n    if(Test-Path \"$out\") {\r\n        Write-Host \"Deleting out folder ...\"\r\n        Remove-Item \"$out\" -Recurse -Force -Confirm:$false\r\n    }\r\n    \r\n    Write-Host \"Expanding archive ...\"\r\n    Expand-Archive -Path \"$file\" -DestinationPath \".\" -Force\r\n    \r\n    Write-Host \"Upload to file share ...\"\r\n    az storage file upload-batch `\r\n    --source \"./$out/.\" `\r\n    --destination \"$destination\" `\r\n    --destination-path \"$destinationPath\" `\r\n    --account-key \"$($env:ACCOUNT_KEY)\" \r\n    \r\n    Write-Host \"Done\"\r\n  \r\n    "
+                "scriptContent": "[variables('$fxv#0')]"
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
