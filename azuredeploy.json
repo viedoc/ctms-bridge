@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.16.2.56959",
-      "templateHash": "4726388155627724667"
+      "templateHash": "1090886006094922798"
     }
   },
   "parameters": {
@@ -76,7 +76,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.16.2.56959",
-              "templateHash": "2722748387791637539"
+              "templateHash": "17450117071933705173"
             }
           },
           "parameters": {
@@ -104,7 +104,6 @@
             }
           },
           "variables": {
-            "$fxv#0": "param (\n    [string] $destination,\n    [string] $version = \"0.0.1\"\n)\n\n$file = \"viedoc.export.console-$version-linux.zip\"\n$zip = \"https://github.com/viedoc/ctms-bridge/releases/download/$version/$file\"\n$out = \"viedoc.export.console\"\n$destinationPath = \"viedoc.export.console\"\n\nWrite-Host \"Donwloading zip file ...\"\nInvoke-WebRequest $zip -OutFile \"$file\"\n\nif(Test-Path \"$out\") {\n    Write-Host \"Deleting out folder ...\"\n    Remove-Item \"$out\" -Recurse -Force -Confirm:$false\n}\n\nWrite-Host \"Expanding archive ...\"\nExpand-Archive -Path \"$file\" -DestinationPath \".\" -Force\n\nWrite-Host \"Upload to file share ...\"\naz storage file upload-batch `\n--source \"./$out/.\" `\n--destination \"$destination\" `\n--destination-path \"$destinationPath\" `\n--account-key \"$($env:ACCOUNT_KEY)\" \n\nWrite-Host \"Done\"\n",
             "alwaysOn": true
           },
           "resources": [
@@ -385,7 +384,7 @@
                     "secureValue": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2022-09-01').keys[1].value]"
                   }
                 ],
-                "scriptContent": "[variables('$fxv#0')]"
+                "primaryScriptUri": "https://github.com/viedoc/ctms-bridge/releases/download/0.0.1/upload-export-application.ps1"
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
