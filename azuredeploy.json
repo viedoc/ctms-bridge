@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.16.2.56959",
-      "templateHash": "12056687223234118119"
+      "templateHash": "8171295526550872072"
     }
   },
   "parameters": {
@@ -76,7 +76,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.16.2.56959",
-              "templateHash": "10108418022456303762"
+              "templateHash": "14058253572504438100"
             }
           },
           "parameters": {
@@ -102,6 +102,10 @@
             "functionAppName": {
               "type": "string"
             }
+          },
+          "variables": {
+            "$fxv#0": "[CmdletBinding()]\r\nparam (\r\n    [Parameter()]\r\n    [string]\r\n    $destination, \r\n\r\n    [Parameter()]\r\n    [string]\r\n    $version = \"0.0.1\"\r\n)\r\n\r\n$file = \"viedoc.export.console-$version-linux.zip\"\r\n$zip = \"https://github.com/viedoc/ctms-bridge/releases/download/$version/$file\"\r\n$out = \"viedoc.export.console\"\r\n$destinationPath = \"viedoc.export.console\"\r\n\r\nWrite-Host \"Donwloading zip file ...\"\r\nInvoke-WebRequest $zip -OutFile \"$file\"\r\n\r\nif(Test-Path \"$out\") {\r\n    Write-Host \"Deleting out folder ...\"\r\n    Remove-Item \"$out\" -Recurse -Force -Confirm:$false\r\n}\r\n\r\nWrite-Host \"Expanding archive ...\"\r\nExpand-Archive -Path \"$file\" -DestinationPath \".\" -Force\r\n\r\nWrite-Host \"Upload to file share ...\"\r\naz storage file upload-batch `\r\n--source \"./$out/.\" `\r\n--destination \"$destination\" `\r\n--destination-path \"$destinationPath\" `\r\n--account-key \"$($env:ACCOUNT_KEY)\" \r\n\r\nWrite-Host \"Done\"\r\n",
+            "alwaysOn": true
           },
           "resources": [
             {
@@ -238,7 +242,7 @@
                 "siteConfig": {
                   "numberOfWorkers": 1,
                   "acrUseManagedIdentityCreds": false,
-                  "alwaysOn": false,
+                  "alwaysOn": "[variables('alwaysOn')]",
                   "http20Enabled": true,
                   "functionAppScaleLimit": 2,
                   "minimumElasticInstanceCount": 0,
@@ -326,7 +330,7 @@
                 "detailedErrorLoggingEnabled": false,
                 "use32BitWorkerProcess": false,
                 "webSocketsEnabled": false,
-                "alwaysOn": false,
+                "alwaysOn": "[variables('alwaysOn')]",
                 "loadBalancing": "LeastRequests",
                 "autoHealEnabled": false,
                 "vnetRouteAllEnabled": false,
@@ -361,6 +365,29 @@
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Web/sites', parameters('functionAppName'))]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Resources/deploymentScripts",
+              "apiVersion": "2020-10-01",
+              "name": "deployscript-upload-blob",
+              "location": "[parameters('location')]",
+              "kind": "AzureCLI",
+              "properties": {
+                "azCliVersion": "2.47.0",
+                "timeout": "PT5M",
+                "retentionInterval": "PT1H",
+                "arguments": "[format('-destination https://{0}.file.core.windows.net/{1}', parameters('storageAccountName'), parameters('fileShareName'))]",
+                "environmentVariables": [
+                  {
+                    "name": "ACCOUNT_KEY",
+                    "secureValue": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2022-09-01').keys[1].value]"
+                  }
+                ],
+                "scriptContent": "[variables('$fxv#0')]"
+              },
+              "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
               ]
             }
