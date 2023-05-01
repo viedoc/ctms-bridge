@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.16.2.56959",
-      "templateHash": "1090886006094922798"
+      "templateHash": "4245022744958001460"
     }
   },
   "parameters": {
@@ -76,7 +76,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.16.2.56959",
-              "templateHash": "17450117071933705173"
+              "templateHash": "11402224115171404789"
             }
           },
           "parameters": {
@@ -377,8 +377,12 @@
                 "azCliVersion": "2.47.0",
                 "timeout": "PT5M",
                 "retentionInterval": "PT1H",
-                "arguments": "[format('-destination https://{0}.file.core.windows.net/{1}', parameters('storageAccountName'), parameters('fileShareName'))]",
+                "cleanupPreference": "OnSuccess",
                 "environmentVariables": [
+                  {
+                    "name": "FILESHARE_URL",
+                    "secureValue": "[format('https://{0}.file.core.windows.net/{1}', parameters('storageAccountName'), parameters('fileShareName'))]"
+                  },
                   {
                     "name": "ACCOUNT_KEY",
                     "secureValue": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2022-09-01').keys[1].value]"
@@ -387,6 +391,7 @@
                 "primaryScriptUri": "https://github.com/viedoc/ctms-bridge/releases/download/0.0.1/upload-export-application.ps1"
               },
               "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', parameters('storageAccountName'), 'default', parameters('fileShareName'))]",
                 "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
               ]
             }
