@@ -282,7 +282,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
     Expand-Archive -Path "viedoc.export.console.zip" -DestinationPath "." -Force
     curl -sL https://aka.ms/InstallAzureCLIDeb | bash
     az version
-    az storage file upload --source "viedoc.export.console" --destination "$($env:FILESHARE_URL)" --account-key "$($env:ACCOUNT_KEY)" 
+    az storage file upload --source "Viedoc.Export.Console" --destination "$($env:FILESHARE_URL)" --account-key "$($env:ACCOUNT_KEY)" 
     Write-Host "Done"
     '''
   }
