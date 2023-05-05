@@ -1,438 +1,336 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "metadata": {
     "_generator": {
       "name": "bicep",
       "version": "0.17.1.54307",
-      "templateHash": "1057569396880190265"
+      "templateHash": "14363050441875225894"
     }
   },
   "parameters": {
     "location": {
       "type": "string",
-      "defaultValue": "[deployment().location]",
+      "defaultValue": "[resourceGroup().location]",
       "metadata": {
-        "description": "Location for the deployment"
+        "description": "Resource group location"
       }
     }
   },
   "variables": {
     "random": "[uniqueString(subscription().id)]",
     "prefix": "viedoc-ctms-bridge-",
-    "resourceGroupName": "[format('{0}{1}', variables('prefix'), variables('random'))]",
     "defaultName": "[format('{0}{1}', variables('prefix'), variables('random'))]",
     "storageAccountName": "[take(toLower(replace(format('{0}', variables('defaultName')), '-', '')), 23)]",
     "fileShareName": "data",
     "workspaceName": "[format('{0}-log-analytics', variables('defaultName'))]",
     "applicationInsightsName": "[format('{0}-insights', variables('defaultName'))]",
     "appServicePlanName": "[format('{0}-farm', variables('defaultName'))]",
-    "functionAppName": "[variables('defaultName')]"
+    "functionAppName": "[variables('defaultName')]",
+    "alwaysOn": true
   },
   "resources": [
     {
-      "type": "Microsoft.Resources/resourceGroups",
-      "apiVersion": "2021-01-01",
-      "name": "[variables('resourceGroupName')]",
-      "location": "[parameters('location')]"
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2022-09-01",
+      "name": "[variables('storageAccountName')]",
+      "location": "[parameters('location')]",
+      "kind": "StorageV2",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "properties": {
+        "accessTier": "Hot",
+        "minimumTlsVersion": "TLS1_2",
+        "allowBlobPublicAccess": false,
+        "supportsHttpsTrafficOnly": true,
+        "networkAcls": {
+          "bypass": "AzureServices",
+          "virtualNetworkRules": [],
+          "ipRules": [],
+          "defaultAction": "Allow"
+        },
+        "encryption": {
+          "services": {
+            "file": {
+              "keyType": "Account",
+              "enabled": true
+            },
+            "blob": {
+              "keyType": "Account",
+              "enabled": true
+            }
+          },
+          "keySource": "Microsoft.Storage"
+        }
+      }
     },
     {
-      "type": "Microsoft.Resources/deployments",
+      "type": "Microsoft.Storage/storageAccounts/blobServices",
       "apiVersion": "2022-09-01",
-      "name": "[format('{0}infrastructure-module', variables('prefix'))]",
-      "resourceGroup": "[variables('resourceGroupName')]",
+      "name": "[format('{0}/{1}', variables('storageAccountName'), 'default')]",
       "properties": {
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "mode": "Incremental",
-        "parameters": {
-          "storageAccountName": {
-            "value": "[variables('storageAccountName')]"
-          },
-          "fileShareName": {
-            "value": "[variables('fileShareName')]"
-          },
-          "workspaceName": {
-            "value": "[variables('workspaceName')]"
-          },
-          "applicationInsightsName": {
-            "value": "[variables('applicationInsightsName')]"
-          },
-          "location": {
-            "value": "[parameters('location')]"
-          },
-          "appServicePlanName": {
-            "value": "[variables('appServicePlanName')]"
-          },
-          "functionAppName": {
-            "value": "[variables('functionAppName')]"
-          }
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "metadata": {
-            "_generator": {
-              "name": "bicep",
-              "version": "0.17.1.54307",
-              "templateHash": "9826205519338175536"
-            }
-          },
-          "parameters": {
-            "location": {
-              "type": "string",
-              "defaultValue": "[resourceGroup().location]"
-            },
-            "storageAccountName": {
-              "type": "string"
-            },
-            "fileShareName": {
-              "type": "string"
-            },
-            "workspaceName": {
-              "type": "string"
-            },
-            "applicationInsightsName": {
-              "type": "string"
-            },
-            "appServicePlanName": {
-              "type": "string"
-            },
-            "functionAppName": {
-              "type": "string"
-            }
-          },
-          "variables": {
-            "alwaysOn": true
-          },
-          "resources": [
-            {
-              "type": "Microsoft.Storage/storageAccounts",
-              "apiVersion": "2022-09-01",
-              "name": "[parameters('storageAccountName')]",
-              "location": "[parameters('location')]",
-              "kind": "StorageV2",
-              "sku": {
-                "name": "Standard_LRS"
-              },
-              "properties": {
-                "accessTier": "Hot",
-                "minimumTlsVersion": "TLS1_2",
-                "allowBlobPublicAccess": false,
-                "supportsHttpsTrafficOnly": true,
-                "networkAcls": {
-                  "bypass": "AzureServices",
-                  "virtualNetworkRules": [],
-                  "ipRules": [],
-                  "defaultAction": "Allow"
-                },
-                "encryption": {
-                  "services": {
-                    "file": {
-                      "keyType": "Account",
-                      "enabled": true
-                    },
-                    "blob": {
-                      "keyType": "Account",
-                      "enabled": true
-                    }
-                  },
-                  "keySource": "Microsoft.Storage"
-                }
-              }
-            },
-            {
-              "type": "Microsoft.Storage/storageAccounts/blobServices",
-              "apiVersion": "2022-09-01",
-              "name": "[format('{0}/{1}', parameters('storageAccountName'), 'default')]",
-              "properties": {
-                "deleteRetentionPolicy": {
-                  "allowPermanentDelete": false,
-                  "enabled": false
-                }
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Storage/storageAccounts/fileServices",
-              "apiVersion": "2022-09-01",
-              "name": "[format('{0}/{1}', parameters('storageAccountName'), 'default')]",
-              "properties": {
-                "shareDeleteRetentionPolicy": {
-                  "enabled": true,
-                  "days": 7
-                }
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
-              "apiVersion": "2022-09-01",
-              "name": "[format('{0}/{1}/{2}', parameters('storageAccountName'), 'default', parameters('fileShareName'))]",
-              "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts/fileServices', parameters('storageAccountName'), 'default')]"
-              ]
-            },
-            {
-              "type": "Microsoft.OperationalInsights/workspaces",
-              "apiVersion": "2020-10-01",
-              "name": "[parameters('workspaceName')]",
-              "location": "[parameters('location')]",
-              "properties": {
-                "sku": {
-                  "name": "PerGB2018"
-                }
-              }
-            },
-            {
-              "type": "Microsoft.Insights/components",
-              "apiVersion": "2020-02-02",
-              "name": "[parameters('applicationInsightsName')]",
-              "location": "[parameters('location')]",
-              "kind": "web",
-              "properties": {
-                "Application_Type": "web",
-                "RetentionInDays": 90,
-                "IngestionMode": "LogAnalytics",
-                "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]",
-                "publicNetworkAccessForIngestion": "Enabled",
-                "publicNetworkAccessForQuery": "Enabled"
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Web/serverfarms",
-              "apiVersion": "2022-09-01",
-              "name": "[parameters('appServicePlanName')]",
-              "location": "[parameters('location')]",
-              "kind": "linux",
-              "properties": {
-                "reserved": true
-              },
-              "sku": {
-                "name": "B1"
-              }
-            },
-            {
-              "type": "Microsoft.Web/sites",
-              "apiVersion": "2022-09-01",
-              "name": "[parameters('functionAppName')]",
-              "location": "[parameters('location')]",
-              "kind": "functionapplinux",
-              "identity": {
-                "type": "SystemAssigned"
-              },
-              "properties": {
-                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]",
-                "enabled": true,
-                "reserved": true,
-                "isXenon": false,
-                "hyperV": false,
-                "vnetRouteAllEnabled": false,
-                "vnetImagePullEnabled": false,
-                "vnetContentShareEnabled": false,
-                "siteConfig": {
-                  "numberOfWorkers": 1,
-                  "acrUseManagedIdentityCreds": false,
-                  "alwaysOn": "[variables('alwaysOn')]",
-                  "http20Enabled": true,
-                  "functionAppScaleLimit": 2,
-                  "minimumElasticInstanceCount": 0,
-                  "appSettings": [
-                    {
-                      "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
-                      "value": "[reference(resourceId('Microsoft.Insights/components', parameters('applicationInsightsName')), '2020-02-02').ConnectionString]"
-                    },
-                    {
-                      "name": "AzureWebJobsStorage",
-                      "value": "[format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', parameters('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2022-09-01').keys[1].value)]"
-                    },
-                    {
-                      "name": "FUNCTIONS_EXTENSION_VERSION",
-                      "value": "~4"
-                    },
-                    {
-                      "name": "FUNCTIONS_WORKER_RUNTIME",
-                      "value": "dotnet-isolated"
-                    },
-                    {
-                      "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
-                      "value": "[format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', parameters('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2022-09-01').keys[1].value)]"
-                    },
-                    {
-                      "name": "WEBSITE_CONTENTSHARE",
-                      "value": "[parameters('functionAppName')]"
-                    },
-                    {
-                      "name": "WEBSITE_MOUNT_ENABLED",
-                      "value": "1"
-                    },
-                    {
-                      "name": "WEBSITE_RUN_FROM_PACKAGE",
-                      "value": "https://github.com/viedoc/ctms-bridge/releases/download/0.0.1/viedoc-ctms-bridge-20230501064054.zip"
-                    },
-                    {
-                      "name": "AppSettingsFile",
-                      "value": "appsettings.json"
-                    },
-                    {
-                      "name": "ExportBasePath",
-                      "value": "/data"
-                    },
-                    {
-                      "name": "ExportConsoleExecutable",
-                      "value": "Viedoc.Export.Console"
-                    },
-                    {
-                      "name": "ExportConsoleExecutableFolder",
-                      "value": "viedoc.export.console"
-                    },
-                    {
-                      "name": "MappingsFolder",
-                      "value": "mappings"
-                    }
-                  ]
-                },
-                "scmSiteAlsoStopped": false,
-                "clientAffinityEnabled": false,
-                "clientCertEnabled": false,
-                "clientCertMode": "Required",
-                "hostNamesDisabled": false,
-                "httpsOnly": true,
-                "redundancyMode": "None",
-                "storageAccountRequired": false,
-                "keyVaultReferenceIdentity": "SystemAssigned"
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Insights/components', parameters('applicationInsightsName'))]",
-                "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]",
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Web/sites/config",
-              "apiVersion": "2022-09-01",
-              "name": "[format('{0}/{1}', parameters('functionAppName'), 'web')]",
-              "properties": {
-                "numberOfWorkers": 1,
-                "netFrameworkVersion": "v4.0",
-                "requestTracingEnabled": false,
-                "remoteDebuggingEnabled": false,
-                "httpLoggingEnabled": false,
-                "detailedErrorLoggingEnabled": false,
-                "use32BitWorkerProcess": false,
-                "webSocketsEnabled": false,
-                "alwaysOn": "[variables('alwaysOn')]",
-                "loadBalancing": "LeastRequests",
-                "autoHealEnabled": false,
-                "vnetRouteAllEnabled": false,
-                "vnetPrivatePortsCount": 0,
-                "localMySqlEnabled": false,
-                "scmIpSecurityRestrictionsUseMain": false,
-                "http20Enabled": true,
-                "minTlsVersion": "1.2",
-                "scmMinTlsVersion": "1.2",
-                "ftpsState": "Disabled",
-                "preWarmedInstanceCount": 0,
-                "functionAppScaleLimit": 2,
-                "functionsRuntimeScaleMonitoringEnabled": false,
-                "minimumElasticInstanceCount": 0
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Web/sites', parameters('functionAppName'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Web/sites/config",
-              "apiVersion": "2021-01-15",
-              "name": "[format('{0}/{1}', parameters('functionAppName'), 'azurestorageaccounts')]",
-              "properties": {
-                "[format('{0}', parameters('fileShareName'))]": {
-                  "type": "AzureFiles",
-                  "shareName": "[parameters('fileShareName')]",
-                  "mountPath": "/data",
-                  "accountName": "[parameters('storageAccountName')]",
-                  "accessKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2022-09-01').keys[1].value]"
-                }
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Web/sites', parameters('functionAppName'))]",
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Resources/deploymentScripts",
-              "apiVersion": "2020-10-01",
-              "name": "deployscript-upload-blob",
-              "location": "[parameters('location')]",
-              "kind": "AzurePowerShell",
-              "properties": {
-                "azPowerShellVersion": "7.0",
-                "timeout": "PT5M",
-                "retentionInterval": "PT1H",
-                "cleanupPreference": "OnSuccess",
-                "environmentVariables": [
-                  {
-                    "name": "FILESHARE_URL",
-                    "secureValue": "[format('https://{0}.file.{1}/{2}', parameters('storageAccountName'), environment().suffixes.storage, parameters('fileShareName'))]"
-                  },
-                  {
-                    "name": "ACCOUNT_KEY",
-                    "secureValue": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2022-09-01').keys[1].value]"
-                  }
-                ],
-                "scriptContent": "    Invoke-WebRequest \"https://github.com/viedoc/Viedoc.Export.Console/releases/download/0.0.1/viedoc.export.console-linux-x64.zip\" -OutFile \"viedoc.export.console.zip\"\r\n    Expand-Archive -Path \"viedoc.export.console.zip\" -DestinationPath \".\" -Force\r\n    curl -sL https://aka.ms/InstallAzureCLIDeb | bash\r\n    az version\r\n    az storage file upload-batch --source \"viedoc.export.console\" --destination \"$($env:FILESHARE_URL)\" --destination-path \"viedoc.export.console\" --account-key \"$($env:ACCOUNT_KEY)\" \r\n    Write-Host \"Done\"\r\n    "
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', parameters('storageAccountName'), 'default', parameters('fileShareName'))]",
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
-              ]
-            }
-          ],
-          "outputs": {
-            "storageAccountName": {
-              "type": "string",
-              "value": "[parameters('storageAccountName')]"
-            },
-            "storageAccountId": {
-              "type": "string",
-              "value": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
-            },
-            "defaultHostName": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Web/sites', parameters('functionAppName')), '2022-09-01').defaultHostName]"
-            }
-          }
+        "deleteRetentionPolicy": {
+          "allowPermanentDelete": false,
+          "enabled": false
         }
       },
       "dependsOn": [
-        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/fileServices",
+      "apiVersion": "2022-09-01",
+      "name": "[format('{0}/{1}', variables('storageAccountName'), 'default')]",
+      "properties": {
+        "shareDeleteRetentionPolicy": {
+          "enabled": true,
+          "days": 7
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+      "apiVersion": "2022-09-01",
+      "name": "[format('{0}/{1}/{2}', variables('storageAccountName'), 'default', variables('fileShareName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/fileServices', variables('storageAccountName'), 'default')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "apiVersion": "2020-10-01",
+      "name": "[variables('workspaceName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "sku": {
+          "name": "PerGB2018"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Insights/components",
+      "apiVersion": "2020-02-02",
+      "name": "[variables('applicationInsightsName')]",
+      "location": "[parameters('location')]",
+      "kind": "web",
+      "properties": {
+        "Application_Type": "web",
+        "RetentionInDays": 90,
+        "IngestionMode": "LogAnalytics",
+        "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('workspaceName'))]",
+        "publicNetworkAccessForIngestion": "Enabled",
+        "publicNetworkAccessForQuery": "Enabled"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', variables('workspaceName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2022-09-01",
+      "name": "[variables('appServicePlanName')]",
+      "location": "[parameters('location')]",
+      "kind": "linux",
+      "properties": {
+        "reserved": true
+      },
+      "sku": {
+        "name": "B1"
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2022-09-01",
+      "name": "[variables('functionAppName')]",
+      "location": "[parameters('location')]",
+      "kind": "functionapplinux",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
+        "enabled": true,
+        "reserved": true,
+        "isXenon": false,
+        "hyperV": false,
+        "vnetRouteAllEnabled": false,
+        "vnetImagePullEnabled": false,
+        "vnetContentShareEnabled": false,
+        "siteConfig": {
+          "numberOfWorkers": 1,
+          "acrUseManagedIdentityCreds": false,
+          "alwaysOn": "[variables('alwaysOn')]",
+          "http20Enabled": true,
+          "functionAppScaleLimit": 2,
+          "minimumElasticInstanceCount": 0,
+          "appSettings": [
+            {
+              "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+              "value": "[reference(resourceId('Microsoft.Insights/components', variables('applicationInsightsName')), '2020-02-02').ConnectionString]"
+            },
+            {
+              "name": "AzureWebJobsStorage",
+              "value": "[format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2022-09-01').keys[1].value)]"
+            },
+            {
+              "name": "FUNCTIONS_EXTENSION_VERSION",
+              "value": "~4"
+            },
+            {
+              "name": "FUNCTIONS_WORKER_RUNTIME",
+              "value": "dotnet-isolated"
+            },
+            {
+              "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+              "value": "[format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2022-09-01').keys[1].value)]"
+            },
+            {
+              "name": "WEBSITE_CONTENTSHARE",
+              "value": "[variables('functionAppName')]"
+            },
+            {
+              "name": "WEBSITE_MOUNT_ENABLED",
+              "value": "1"
+            },
+            {
+              "name": "WEBSITE_RUN_FROM_PACKAGE",
+              "value": "https://github.com/viedoc/ctms-bridge/releases/download/0.0.1/viedoc-ctms-bridge-20230501064054.zip"
+            },
+            {
+              "name": "AppSettingsFile",
+              "value": "appsettings.json"
+            },
+            {
+              "name": "ExportBasePath",
+              "value": "/data"
+            },
+            {
+              "name": "ExportConsoleExecutable",
+              "value": "Viedoc.Export.Console"
+            },
+            {
+              "name": "ExportConsoleExecutableFolder",
+              "value": "viedoc.export.console"
+            },
+            {
+              "name": "MappingsFolder",
+              "value": "mappings"
+            }
+          ]
+        },
+        "scmSiteAlsoStopped": false,
+        "clientAffinityEnabled": false,
+        "clientCertEnabled": false,
+        "clientCertMode": "Required",
+        "hostNamesDisabled": false,
+        "httpsOnly": true,
+        "redundancyMode": "None",
+        "storageAccountRequired": false,
+        "keyVaultReferenceIdentity": "SystemAssigned"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/components', variables('applicationInsightsName'))]",
+        "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Web/sites/config",
+      "apiVersion": "2022-09-01",
+      "name": "[format('{0}/{1}', variables('functionAppName'), 'web')]",
+      "properties": {
+        "numberOfWorkers": 1,
+        "netFrameworkVersion": "v4.0",
+        "requestTracingEnabled": false,
+        "remoteDebuggingEnabled": false,
+        "httpLoggingEnabled": false,
+        "detailedErrorLoggingEnabled": false,
+        "use32BitWorkerProcess": false,
+        "webSocketsEnabled": false,
+        "alwaysOn": "[variables('alwaysOn')]",
+        "loadBalancing": "LeastRequests",
+        "autoHealEnabled": false,
+        "vnetRouteAllEnabled": false,
+        "vnetPrivatePortsCount": 0,
+        "localMySqlEnabled": false,
+        "scmIpSecurityRestrictionsUseMain": false,
+        "http20Enabled": true,
+        "minTlsVersion": "1.2",
+        "scmMinTlsVersion": "1.2",
+        "ftpsState": "Disabled",
+        "preWarmedInstanceCount": 0,
+        "functionAppScaleLimit": 2,
+        "functionsRuntimeScaleMonitoringEnabled": false,
+        "minimumElasticInstanceCount": 0
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('functionAppName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Web/sites/config",
+      "apiVersion": "2021-01-15",
+      "name": "[format('{0}/{1}', variables('functionAppName'), 'azurestorageaccounts')]",
+      "properties": {
+        "[format('{0}', variables('fileShareName'))]": {
+          "type": "AzureFiles",
+          "shareName": "[variables('fileShareName')]",
+          "mountPath": "/data",
+          "accountName": "[variables('storageAccountName')]",
+          "accessKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2022-09-01').keys[1].value]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('functionAppName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deploymentScripts",
+      "apiVersion": "2020-10-01",
+      "name": "deployscript-upload-blob",
+      "location": "[parameters('location')]",
+      "kind": "AzurePowerShell",
+      "properties": {
+        "azPowerShellVersion": "7.0",
+        "timeout": "PT5M",
+        "retentionInterval": "PT1H",
+        "cleanupPreference": "OnSuccess",
+        "environmentVariables": [
+          {
+            "name": "FILESHARE_URL",
+            "secureValue": "[format('https://{0}.file.{1}/{2}', variables('storageAccountName'), environment().suffixes.storage, variables('fileShareName'))]"
+          },
+          {
+            "name": "ACCOUNT_KEY",
+            "secureValue": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2022-09-01').keys[1].value]"
+          }
+        ],
+        "scriptContent": "    Invoke-WebRequest \"https://github.com/viedoc/Viedoc.Export.Console/releases/download/0.0.1/viedoc.export.console-linux-x64.zip\" -OutFile \"viedoc.export.console.zip\"\r\n    Expand-Archive -Path \"viedoc.export.console.zip\" -DestinationPath \".\" -Force\r\n    curl -sL https://aka.ms/InstallAzureCLIDeb | bash\r\n    az version\r\n    az storage file upload-batch --source \"viedoc.export.console\" --destination \"$($env:FILESHARE_URL)\" --destination-path \"viedoc.export.console\" --account-key \"$($env:ACCOUNT_KEY)\" \r\n    Write-Host \"Done\"\r\n    "
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', variables('storageAccountName'), 'default', variables('fileShareName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
       ]
     }
   ],
   "outputs": {
-    "resourceGroupName": {
-      "type": "string",
-      "value": "[variables('resourceGroupName')]"
-    },
     "storageAccountName": {
       "type": "string",
-      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('{0}infrastructure-module', variables('prefix'))), '2022-09-01').outputs.storageAccountName.value]"
+      "value": "[variables('storageAccountName')]"
     },
     "storageAccountId": {
       "type": "string",
-      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('{0}infrastructure-module', variables('prefix'))), '2022-09-01').outputs.storageAccountId.value]"
+      "value": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
     },
     "url": {
       "type": "string",
-      "value": "[format('https://{0}', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('{0}infrastructure-module', variables('prefix'))), '2022-09-01').outputs.defaultHostName.value)]"
+      "value": "[format('https://{0}', reference(resourceId('Microsoft.Web/sites', variables('functionAppName')), '2022-09-01').defaultHostName)]"
     }
   }
 }
