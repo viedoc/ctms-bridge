@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.17.1.54307",
-      "templateHash": "17783203769430885045"
+      "templateHash": "12868456075307700106"
     }
   },
   "parameters": {
@@ -309,11 +309,19 @@
             "secureValue": "[format('https://{0}.file.{1}/{2}', variables('storageAccountName'), environment().suffixes.storage, variables('fileShareName'))]"
           },
           {
-            "name": "ACCOUNT_KEY",
+            "name": "AZURE_STORAGE_KEY",
             "secureValue": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2022-09-01').keys[1].value]"
+          },
+          {
+            "name": "AZURE_STORAGE_ACCOUNT",
+            "secureValue": "[variables('storageAccountName')]"
+          },
+          {
+            "name": "SHARE_NAME",
+            "secureValue": "[variables('fileShareName')]"
           }
         ],
-        "scriptContent": "    Invoke-WebRequest \"https://github.com/viedoc/Viedoc.Export.Console/releases/download/0.0.1/viedoc.export.console-linux-x64.zip\" -OutFile \"viedoc.export.console.zip\"\r\n    Expand-Archive -Path \"viedoc.export.console.zip\" -DestinationPath \".\" -Force\r\n    curl -sL https://aka.ms/InstallAzureCLIDeb | bash\r\n    az version\r\n    az storage file upload --source \"Viedoc.Export.Console\" --destination \"$($env:FILESHARE_URL)\" --account-key \"$($env:ACCOUNT_KEY)\" \r\n    Write-Host \"Done\"\r\n    "
+        "scriptContent": "    Invoke-WebRequest \"https://github.com/viedoc/Viedoc.Export.Console/releases/download/0.0.1/viedoc.export.console-linux-x64.zip\" -OutFile \"viedoc.export.console.zip\"\r\n    Expand-Archive -Path \"viedoc.export.console.zip\" -DestinationPath \".\" -Force\r\n    curl -sL https://aka.ms/InstallAzureCLIDeb | bash\r\n    az version\r\n    az storage file upload --source \"./Viedoc.Export.Console\" --share-name \"$($env:SHARE_NAME)\" \r\n    Write-Host \"Done\"\r\n    "
       },
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', variables('storageAccountName'), 'default', variables('fileShareName'))]",

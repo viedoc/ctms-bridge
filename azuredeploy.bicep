@@ -273,8 +273,16 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
         secureValue: 'https://${storageAccountName}.file.${environment().suffixes.storage}/${fileShareName}'
       }
       {
-        name: 'ACCOUNT_KEY'
+        name: 'AZURE_STORAGE_KEY'
         secureValue: storageAccountKey
+      }
+      {
+        name: 'AZURE_STORAGE_ACCOUNT'
+        secureValue: storageAccountName
+      }
+      {
+        name: 'SHARE_NAME'
+        secureValue: fileShareName
       }
     ]
     scriptContent: '''
@@ -282,7 +290,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
     Expand-Archive -Path "viedoc.export.console.zip" -DestinationPath "." -Force
     curl -sL https://aka.ms/InstallAzureCLIDeb | bash
     az version
-    az storage file upload --source "Viedoc.Export.Console" --destination "$($env:FILESHARE_URL)" --account-key "$($env:ACCOUNT_KEY)" 
+    az storage file upload --source "./Viedoc.Export.Console" --share-name "$($env:SHARE_NAME)" 
     Write-Host "Done"
     '''
   }
