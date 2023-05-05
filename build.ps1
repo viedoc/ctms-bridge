@@ -1,9 +1,6 @@
-$outFile = "azuredeploy.json"
-$main = "main.bicep"
+Write-Host "Build"
 
-Write-Host "Building main.bicep ..."
-
-az bicep build --file $main --outfile $outFile
+az bicep build --file "azuredeploy.bicep" --outfile "azuredeploy.json"
 
 Write-Host "Push"
 
