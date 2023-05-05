@@ -137,6 +137,7 @@ resource func 'Microsoft.Web/sites@2022-09-01' = {
     vnetImagePullEnabled: false
     vnetContentShareEnabled: false
     siteConfig: {
+      linuxFxVersion: 'DOTNET-ISOLATED|7.0'
       numberOfWorkers: 1
       acrUseManagedIdentityCreds: false
       alwaysOn: alwaysOn
@@ -174,7 +175,7 @@ resource func 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'WEBSITE_RUN_FROM_PACKAGE'
-          value: 'https://github.com/viedoc/ctms-bridge/releases/download/0.0.1/viedoc-ctms-bridge-20230501064054.zip'
+          value: 'https://github.com/viedoc/ctms-bridge/releases/download/0.0.1/viedoc-ctms-bridge-20230505044826.zip'
         }
         {
           name: 'AppSettingsFile'
@@ -190,11 +191,11 @@ resource func 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'ExportConsoleExecutableFolder'
-          value: 'viedoc.export.console'
+          value: ''
         }
         {
           name: 'MappingsFolder'
-          value: 'mappings'
+          value: ''
         }
       ]
     }
@@ -214,6 +215,7 @@ resource func_config 'Microsoft.Web/sites/config@2022-09-01' = {
   parent: func
   name: 'web'
   properties: {
+    linuxFxVersion: 'DOTNET-ISOLATED|7.0'
     numberOfWorkers: 1
     netFrameworkVersion: 'v4.0'
     requestTracingEnabled: false

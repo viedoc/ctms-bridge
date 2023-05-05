@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.17.1.54307",
-      "templateHash": "14363050441875225894"
+      "templateHash": "17849736970902927118"
     }
   },
   "parameters": {
@@ -162,6 +162,7 @@
         "vnetImagePullEnabled": false,
         "vnetContentShareEnabled": false,
         "siteConfig": {
+          "linuxFxVersion": "DOTNET-ISOLATED|7.0",
           "numberOfWorkers": 1,
           "acrUseManagedIdentityCreds": false,
           "alwaysOn": "[variables('alwaysOn')]",
@@ -199,7 +200,7 @@
             },
             {
               "name": "WEBSITE_RUN_FROM_PACKAGE",
-              "value": "https://github.com/viedoc/ctms-bridge/releases/download/0.0.1/viedoc-ctms-bridge-20230501064054.zip"
+              "value": "https://github.com/viedoc/ctms-bridge/releases/download/0.0.1/viedoc-ctms-bridge-20230505044826.zip"
             },
             {
               "name": "AppSettingsFile",
@@ -215,11 +216,11 @@
             },
             {
               "name": "ExportConsoleExecutableFolder",
-              "value": "viedoc.export.console"
+              "value": ""
             },
             {
               "name": "MappingsFolder",
-              "value": "mappings"
+              "value": ""
             }
           ]
         },
@@ -244,6 +245,7 @@
       "apiVersion": "2022-09-01",
       "name": "[format('{0}/{1}', variables('functionAppName'), 'web')]",
       "properties": {
+        "linuxFxVersion": "DOTNET-ISOLATED|7.0",
         "numberOfWorkers": 1,
         "netFrameworkVersion": "v4.0",
         "requestTracingEnabled": false,
