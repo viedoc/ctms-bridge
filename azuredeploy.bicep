@@ -150,10 +150,6 @@ resource func 'Microsoft.Web/sites@2022-09-01' = {
           value: ai.properties.ConnectionString
         }
         {
-          name: 'AzureWebJobsStorage'
-          value: storageAccountConnectionString
-        }
-        {
           name: 'FUNCTIONS_EXTENSION_VERSION'
           value: '~4'
         }
