@@ -175,7 +175,7 @@ resource func 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'WEBSITE_RUN_FROM_PACKAGE'
-          value: 'https://github.com/viedoc/ctms-bridge/releases/download/0.0.1/viedoc-ctms-bridge-20230506121745.zip'
+          value: 'https://github.com/viedoc/ctms-bridge/releases/download/0.0.1/viedoc-ctms-bridge-20230506123001.zip'
         }
         {
           name: 'DataBridge__AppSettingsFile'
