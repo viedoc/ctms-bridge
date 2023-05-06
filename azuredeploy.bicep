@@ -175,7 +175,7 @@ resource func 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'WEBSITE_RUN_FROM_PACKAGE'
-          value: 'https://github.com/viedoc/ctms-bridge/releases/download/0.0.1/viedoc-ctms-bridge-20230505071446.zip'
+          value: 'https://github.com/viedoc/ctms-bridge/releases/download/0.0.1/viedoc-ctms-bridge-20230506114855.zip'
         }
         {
           name: 'AppSettingsFile'
@@ -196,6 +196,23 @@ resource func 'Microsoft.Web/sites@2022-09-01' = {
         {
           name: 'MappingsFolder'
           value: ''
+        }
+        
+        {
+          name: 'ViedocExportConsole__ClientId'
+          value: '92ac892a-f27c-4931-b9bc-1f4f66e30743'
+        }
+        {
+          name: 'ViedocExportConsole__ClientSecret'
+          value: 'bV_tWwfjrVgdaOHm8jTO9aSZtisrkTw8u2kokfZrxFw'
+        }
+        {
+          name: 'ViedocExportConsole__ApiUrl'
+          value: 'https://externaltest4api.viedoc.net'
+        }
+        {
+          name: 'ViedocExportConsole__TokenUrl'
+          value: 'https://externaltest4sts.viedoc.net/connect/token'
         }
       ]
     }
