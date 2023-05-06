@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.17.1.54307",
-      "templateHash": "7140825379960076672"
+      "templateHash": "89746944228377723"
     }
   },
   "parameters": {
@@ -200,7 +200,7 @@
             },
             {
               "name": "WEBSITE_RUN_FROM_PACKAGE",
-              "value": "https://github.com/viedoc/ctms-bridge/releases/download/0.0.1/viedoc-ctms-bridge-20230506120755.zip"
+              "value": "https://github.com/viedoc/ctms-bridge/releases/download/0.0.1/viedoc-ctms-bridge-20230506121745.zip"
             },
             {
               "name": "DataBridge__AppSettingsFile",
