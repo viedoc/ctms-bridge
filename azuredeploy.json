@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.17.1.54307",
-      "templateHash": "5207752569615351176"
+      "templateHash": "2210967892789926890"
     }
   },
   "parameters": {
@@ -67,7 +67,7 @@
     "fileShareName": "data",
     "workspaceName": "[format('{0}-log-analytics', variables('defaultName'))]",
     "applicationInsightsName": "[format('{0}-insights', variables('defaultName'))]",
-    "keyVaultName": "[format('{0}-vault', variables('random'))]",
+    "keyVaultName": "[format('v-{0}-vault', variables('random'))]",
     "appServicePlanName": "[format('{0}-farm', variables('defaultName'))]",
     "functionAppName": "[variables('defaultName')]",
     "alwaysOn": true,
