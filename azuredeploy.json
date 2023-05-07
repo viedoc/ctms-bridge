@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.17.1.54307",
-      "templateHash": "575077851778430412"
+      "templateHash": "4999597601104305235"
     }
   },
   "parameters": {
@@ -31,18 +31,9 @@
     }
   },
   "variables": {
-    "copy": [
-      {
-        "name": "userSecrets",
-        "count": "[length(parameters('secrets'))]",
-        "input": {
-          "name": "[format('UserSecret__{0}', parameters('secrets')[copyIndex('userSecrets')].name)]",
-          "value": "[parameters('secrets')[copyIndex('userSecrets')].value]"
-        }
-      }
-    ],
     "random": "[uniqueString(subscription().id)]",
     "prefix": "viedoc-ctms-bridge-",
+    "userSecrets": "[map(parameters('secrets'), lambda('secret', createObject('name', format('UserSecret__{0}', lambdaVariables('secret').name), 'value', lambdaVariables('secret').value)))]",
     "defaultName": "[format('{0}{1}', variables('prefix'), variables('random'))]",
     "storageAccountName": "[take(toLower(replace(format('{0}', variables('defaultName')), '-', '')), 23)]",
     "fileShareName": "data",

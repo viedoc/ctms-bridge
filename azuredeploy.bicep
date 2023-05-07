@@ -16,10 +16,10 @@ param secrets array = [
   }
 ]
 
-var userSecrets = [ for x in secrets:{  
-    name: 'UserSecret__${x.name}'
-    value: x.value
-  }]
+var userSecrets = map(secrets, secret => {  
+    name: 'UserSecret__${secret.name}'
+    value: secret.value
+  })
 
 var defaultName = '${prefix}${random}'
 var storageAccountName = take(toLower(replace('${defaultName}','-','')),23)
