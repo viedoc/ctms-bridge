@@ -15,6 +15,7 @@ param ViedocApiTokenUrl string = 'https://externaltest4sts.viedoc.net/connect/to
 param secret1Name string = 'BsiClientId'
 @secure()
 param secret1Value string = 'ctms_api_user'
+
 param secret2Name string = 'BsiClientSecret'
 @secure()
 param secret2Value string = '62lmGf$gfK!a27Fmgd'
@@ -230,14 +231,14 @@ resource func 'Microsoft.Web/sites@2022-09-01' = {
       functionAppScaleLimit: 2
       minimumElasticInstanceCount: 0
       appSettings: union(userSecrets, [
-          {
-            name: userSecrets[0].name
-            value: '@Microsoft.KeyVault(SecretUri=${userSecretsSecrets[0].properties.secretUri})'
-          }
-          {
-            name: userSecrets[1].name
-            value: '@Microsoft.KeyVault(SecretUri=${userSecretsSecrets[1].properties.secretUri})'
-          }
+          // {
+          //   name: userSecrets[0].name
+          //   value: '@Microsoft.KeyVault(SecretUri=${userSecretsSecrets[0].properties.secretUri})'
+          // }
+          // {
+          //   name: userSecrets[1].name
+          //   value: '@Microsoft.KeyVault(SecretUri=${userSecretsSecrets[1].properties.secretUri})'
+          // }
           {
             name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
             value: ai.properties.ConnectionString
@@ -296,11 +297,11 @@ resource func 'Microsoft.Web/sites@2022-09-01' = {
           }
           {
             name: 'ViedocExportConsole__ClientId'
-            value: ViedocApiClientId
+            value: '@Microsoft.KeyVault(SecretUri=${apiClientIdSecret.properties.secretUri})'
           }
           {
             name: 'ViedocExportConsole__ClientSecret'
-            value: ViedocApiClientSecret
+            value: '@Microsoft.KeyVault(SecretUri=${apiClientSecretSecret.properties.secretUri})'
           }
           {
             name: 'ViedocExportConsole__ApiUrl'
