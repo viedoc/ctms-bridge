@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.17.1.54307",
-      "templateHash": "1741086541506543745"
+      "templateHash": "2969397019545911540"
     }
   },
   "parameters": {
@@ -52,6 +52,14 @@
   "variables": {
     "random": "[uniqueString(subscription().id)]",
     "prefix": "viedoc-ctms-bridge-",
+    "defaultName": "[format('{0}{1}', variables('prefix'), variables('random'))]",
+    "storageAccountName": "[take(toLower(replace(format('{0}', variables('defaultName')), '-', '')), 23)]",
+    "fileShareName": "data",
+    "workspaceName": "[format('{0}-log-analytics', variables('defaultName'))]",
+    "applicationInsightsName": "[format('{0}-insights', variables('defaultName'))]",
+    "keyVaultName": "[format('v-{0}-vault', variables('random'))]",
+    "appServicePlanName": "[format('{0}-farm', variables('defaultName'))]",
+    "functionAppName": "[variables('defaultName')]",
     "userSecrets": [
       {
         "name": "[format('UserSecret__{0}', parameters('secret1Name'))]",
@@ -62,14 +70,6 @@
         "value": "[parameters('secret2Value')]"
       }
     ],
-    "defaultName": "[format('{0}{1}', variables('prefix'), variables('random'))]",
-    "storageAccountName": "[take(toLower(replace(format('{0}', variables('defaultName')), '-', '')), 23)]",
-    "fileShareName": "data",
-    "workspaceName": "[format('{0}-log-analytics', variables('defaultName'))]",
-    "applicationInsightsName": "[format('{0}-insights', variables('defaultName'))]",
-    "keyVaultName": "[format('v-{0}-vault', variables('random'))]",
-    "appServicePlanName": "[format('{0}-farm', variables('defaultName'))]",
-    "functionAppName": "[variables('defaultName')]",
     "alwaysOn": true,
     "KEY_VAULT_SECRETS_USER_ROLE_GUID": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')]"
   },

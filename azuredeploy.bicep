@@ -20,28 +20,6 @@ param secret2Name string = 'BsiClientSecret'
 @secure()
 param secret2Value string = '62lmGf$gfK!a27Fmgd'
 
-// param secrets array = [
-//   {
-//     name: 'BsiClientId'
-//     value: 'ctms_api_user'
-//   }
-//   {
-//     name: 'BsiClientSecret'
-//     value: '62lmGf$gfK!a27Fmgd'
-//   }
-// ]
-
-var userSecrets = [
-  {
-    name: 'UserSecret__${secret1Name}'
-    value: secret1Value
-  }
-  {
-    name: 'UserSecret__${secret2Name}'
-    value: secret2Value
-  }
-]
-
 var defaultName = '${prefix}${random}'
 var storageAccountName = take(toLower(replace('${defaultName}', '-', '')), 23)
 var fileShareName = 'data'
@@ -178,6 +156,17 @@ resource apiClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2021-11-01-pre
     value: secret1Value
   }
 }
+
+var userSecrets = [
+  {
+    name: 'UserSecret__${secret1Name}'
+    value: secret1Value
+  }
+  {
+    name: 'UserSecret__${secret2Name}'
+    value: secret2Value
+  }
+]
 
 resource userSecretsSecrets 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = [for userSecret in userSecrets: {
   parent: keyVault
