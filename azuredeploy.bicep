@@ -295,10 +295,10 @@ resource func 'Microsoft.Web/sites@2022-09-01' = {
             name: 'DataBridge__SyncInterval'
             value: '0 */20 * * * *'
           }
-          // {
-          //   name: 'ViedocExportConsole__ClientId'
-          //   value: '@Microsoft.KeyVault(SecretUri=${apiClientIdSecret.properties.secretUri})'
-          // }
+          {
+            name: 'ViedocExportConsole__ClientId'
+            value: '@Microsoft.KeyVault(SecretUri=${apiClientIdSecret.properties.secretUri})'
+          }
           // {
           //   name: 'ViedocExportConsole__ClientSecret'
           //   value: '@Microsoft.KeyVault(SecretUri=${apiClientSecretSecret.properties.secretUri})'
