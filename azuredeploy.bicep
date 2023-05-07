@@ -7,20 +7,20 @@ var prefix = 'viedoc-ctms-bridge-'
 param createKeyVaultSecrets bool = false
 
 @secure()
-param ViedocApiClientId string = '92ac892a-f27c-4931-b9bc-1f4f66e30743'
+param ViedocApiClientId string = ''
 @secure()
-param ViedocApiClientSecret string = 'bV_tWwfjrVgdaOHm8jTO9aSZtisrkTw8u2kokfZrxFw'
+param ViedocApiClientSecret string = ''
 
 param ViedocApiUrl string = 'https://externaltest4api.viedoc.net'
 param ViedocApiTokenUrl string = 'https://externaltest4sts.viedoc.net/connect/token'
 
 param secret1Name string = 'BsiClientId'
 @secure()
-param secret1Value string = 'ctms_api_user'
+param secret1Value string = ''
 
 param secret2Name string = 'BsiClientSecret'
 @secure()
-param secret2Value string = '62lmGf$gfK!a27Fmgd'
+param secret2Value string = ''
 
 var defaultName = '${prefix}${random}'
 var storageAccountName = take(toLower(replace('${defaultName}', '-', '')), 23)
