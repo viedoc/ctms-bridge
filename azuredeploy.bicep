@@ -5,6 +5,22 @@ param location string = resourceGroup().location
 var random = uniqueString(subscription().id)
 var prefix = 'viedoc-ctms-bridge-'
 
+param secrets array = [
+  {  
+    name: 'BsiClientId'
+    value: 'ctms_api_user'
+  }
+  {  
+    name: 'BsiClientSecret'
+    value: '62lmGf$gfK!a27Fmgd'
+  }
+]
+
+var userSecrets = [ for x in secrets:{  
+    name: 'UserSecret__${x}'
+    value: secrets[x]
+  }]
+
 var defaultName = '${prefix}${random}'
 var storageAccountName = take(toLower(replace('${defaultName}','-','')),23)
 var fileShareName = 'data'
@@ -144,7 +160,7 @@ resource func 'Microsoft.Web/sites@2022-09-01' = {
       http20Enabled: true
       functionAppScaleLimit: 2
       minimumElasticInstanceCount: 0
-      appSettings:[
+      appSettings: union(userSecrets, [
         {
           name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
           value: ai.properties.ConnectionString
@@ -175,7 +191,7 @@ resource func 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'WEBSITE_RUN_FROM_PACKAGE'
-          value: 'https://github.com/viedoc/ctms-bridge/releases/download/0.0.1/viedoc-ctms-bridge-20230506123001.zip'
+          value: 'https://github.com/viedoc/ctms-bridge/releases/download/0.0.1/viedoc-ctms-bridge-20230507093712.zip'
         }
         {
           name: 'DataBridge__AppSettingsFile'
@@ -217,7 +233,7 @@ resource func 'Microsoft.Web/sites@2022-09-01' = {
           name: 'ViedocExportConsole__TokenUrl'
           value: 'https://externaltest4sts.viedoc.net/connect/token'
         }
-      ]
+      ])
     }
     scmSiteAlsoStopped: false
     clientAffinityEnabled: false
