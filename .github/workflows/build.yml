@@ -30,7 +30,22 @@ jobs:
         run: echo Hello, world!
 
       # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+      - name: Check bicep version
+        run: az bicep version
+
+      - name: Build azuredeploy.bicep --> azuredeploy.json
+        run: az bicep build --file "azuredeploy.bicep" --outfile "azuredeploy.json"
+
+      - name: Commit changes
+        if: always()
         run: |
-          echo Check bicep version
-          az bicep version
+          git config --global user.email "github-actions@noreply.github.com"
+          git config --global user.name "Github-Action Build"
+
+          git add azuredeploy.json
+
+          if ! git diff-index --quiet HEAD --; then
+            git commit -m "Github action: Build"
+            git push
+          fi
+
