@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.17.1.54307",
-      "templateHash": "410563611125360751"
+      "templateHash": "5207752569615351176"
     }
   },
   "parameters": {
@@ -290,8 +290,7 @@
         "[resourceId('Microsoft.Insights/components', variables('applicationInsightsName'))]",
         "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
-        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('userSecrets')[1].name)]",
-        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('userSecrets')[0].name)]"
+        "userSecretsSecrets"
       ]
     },
     {

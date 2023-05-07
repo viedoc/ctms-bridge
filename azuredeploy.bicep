@@ -322,6 +322,9 @@ resource func 'Microsoft.Web/sites@2022-09-01' = {
     storageAccountRequired: false
     keyVaultReferenceIdentity: 'SystemAssigned'
   }
+  dependsOn: [
+    userSecretsSecrets
+  ]
 }
 
 resource func_config 'Microsoft.Web/sites/config@2022-09-01' = {
