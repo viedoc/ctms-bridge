@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.17.1.54307",
-      "templateHash": "3757243708139902096"
+      "templateHash": "12668385879105718807"
     }
   },
   "parameters": {
@@ -15,6 +15,22 @@
       "metadata": {
         "description": "Resource group location"
       }
+    },
+    "ViedocApiClientId": {
+      "type": "securestring",
+      "defaultValue": "92ac892a-f27c-4931-b9bc-1f4f66e30743"
+    },
+    "ViedocApiClientSecret": {
+      "type": "securestring",
+      "defaultValue": "bV_tWwfjrVgdaOHm8jTO9aSZtisrkTw8u2kokfZrxFw"
+    },
+    "ViedocApiUrl": {
+      "type": "string",
+      "defaultValue": "https://externaltest4api.viedoc.net"
+    },
+    "ViedocApiTokenUrl": {
+      "type": "string",
+      "defaultValue": "https://externaltest4sts.viedoc.net/connect/token"
     },
     "secret1Name": {
       "type": "string",
@@ -36,25 +52,26 @@
   "variables": {
     "random": "[uniqueString(subscription().id)]",
     "prefix": "viedoc-ctms-bridge-",
-    "secrets": [
+    "userSecrets": [
       {
-        "name": "[parameters('secret1Name')]",
+        "name": "[format('UserSecret__{0}', parameters('secret1Name'))]",
         "value": "[parameters('secret1Value')]"
       },
       {
-        "name": "[parameters('secret2Name')]",
+        "name": "[format('UserSecret__{0}', parameters('secret2Name'))]",
         "value": "[parameters('secret2Value')]"
       }
     ],
-    "userSecrets": "[filter(map(variables('secrets'), lambda('secret', createObject('name', format('UserSecret__{0}', lambdaVariables('secret').name), 'value', lambdaVariables('secret').value))), lambda('secret', not(empty(lambdaVariables('secret').value))))]",
     "defaultName": "[format('{0}{1}', variables('prefix'), variables('random'))]",
     "storageAccountName": "[take(toLower(replace(format('{0}', variables('defaultName')), '-', '')), 23)]",
     "fileShareName": "data",
     "workspaceName": "[format('{0}-log-analytics', variables('defaultName'))]",
     "applicationInsightsName": "[format('{0}-insights', variables('defaultName'))]",
+    "keyVaultName": "[format('{0}-vault', variables('defaultName'))]",
     "appServicePlanName": "[format('{0}-farm', variables('defaultName'))]",
     "functionAppName": "[variables('defaultName')]",
-    "alwaysOn": true
+    "alwaysOn": true,
+    "KEY_VAULT_SECRETS_USER_ROLE_GUID": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')]"
   },
   "resources": [
     {
@@ -158,6 +175,67 @@
       ]
     },
     {
+      "type": "Microsoft.KeyVault/vaults",
+      "apiVersion": "2021-11-01-preview",
+      "name": "[variables('keyVaultName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "enabledForDeployment": false,
+        "enabledForDiskEncryption": false,
+        "enabledForTemplateDeployment": true,
+        "tenantId": "[subscription().tenantId]",
+        "enableSoftDelete": true,
+        "softDeleteRetentionInDays": 7,
+        "enableRbacAuthorization": true,
+        "accessPolicies": [],
+        "sku": {
+          "name": "standard",
+          "family": "A"
+        },
+        "networkAcls": {
+          "defaultAction": "Allow",
+          "bypass": "AzureServices"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2021-11-01-preview",
+      "name": "[format('{0}/{1}', variables('keyVaultName'), 'viedoc-api-client-id')]",
+      "properties": {
+        "value": "[parameters('secret1Value')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2021-11-01-preview",
+      "name": "[format('{0}/{1}', variables('keyVaultName'), 'viedoc-api-client-secret')]",
+      "properties": {
+        "value": "[parameters('secret1Value')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
+      ]
+    },
+    {
+      "copy": {
+        "name": "userSecretsSecrets",
+        "count": "[length(variables('userSecrets'))]"
+      },
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2021-11-01-preview",
+      "name": "[format('{0}/{1}', variables('keyVaultName'), variables('userSecrets')[copyIndex()].name)]",
+      "properties": {
+        "value": "[variables('userSecrets')[copyIndex()].value]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
+      ]
+    },
+    {
       "type": "Microsoft.Web/serverfarms",
       "apiVersion": "2022-09-01",
       "name": "[variables('appServicePlanName')]",
@@ -196,7 +274,7 @@
           "http20Enabled": true,
           "functionAppScaleLimit": 2,
           "minimumElasticInstanceCount": 0,
-          "appSettings": "[union(variables('userSecrets'), createArray(createObject('name', 'APPLICATIONINSIGHTS_CONNECTION_STRING', 'value', reference(resourceId('Microsoft.Insights/components', variables('applicationInsightsName')), '2020-02-02').ConnectionString), createObject('name', 'AzureWebJobsStorage', 'value', format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2022-09-01').keys[1].value)), createObject('name', 'FUNCTIONS_EXTENSION_VERSION', 'value', '~4'), createObject('name', 'FUNCTIONS_WORKER_RUNTIME', 'value', 'dotnet-isolated'), createObject('name', 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING', 'value', format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2022-09-01').keys[1].value)), createObject('name', 'WEBSITE_CONTENTSHARE', 'value', variables('functionAppName')), createObject('name', 'WEBSITE_MOUNT_ENABLED', 'value', '1'), createObject('name', 'WEBSITE_RUN_FROM_PACKAGE', 'value', 'https://github.com/viedoc/ctms-bridge/releases/download/0.0.1/viedoc-ctms-bridge-20230507093712.zip'), createObject('name', 'DataBridge__AppSettingsFile', 'value', 'appsettings.json'), createObject('name', 'DataBridge__BasePath', 'value', '/data'), createObject('name', 'DataBridge__ExportConsoleExecutable', 'value', 'Viedoc.Export.Console'), createObject('name', 'DataBridge__ExportConsoleExecutableFolder', 'value', ''), createObject('name', 'DataBridge__MappingsFolder', 'value', ''), createObject('name', 'DataBridge__SyncInterval', 'value', '0 */20 * * * *'), createObject('name', 'ViedocExportConsole__ClientId', 'value', '92ac892a-f27c-4931-b9bc-1f4f66e30743'), createObject('name', 'ViedocExportConsole__ClientSecret', 'value', 'bV_tWwfjrVgdaOHm8jTO9aSZtisrkTw8u2kokfZrxFw'), createObject('name', 'ViedocExportConsole__ApiUrl', 'value', 'https://externaltest4api.viedoc.net'), createObject('name', 'ViedocExportConsole__TokenUrl', 'value', 'https://externaltest4sts.viedoc.net/connect/token')))]"
+          "appSettings": "[union(variables('userSecrets'), createArray(createObject('name', variables('userSecrets')[0].name, 'value', format('@Microsoft.KeyVault(SecretUri={0})', reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('userSecrets')[0].name), '2021-11-01-preview').secretUri)), createObject('name', variables('userSecrets')[1].name, 'value', format('@Microsoft.KeyVault(SecretUri={0})', reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('userSecrets')[1].name), '2021-11-01-preview').secretUri)), createObject('name', 'APPLICATIONINSIGHTS_CONNECTION_STRING', 'value', reference(resourceId('Microsoft.Insights/components', variables('applicationInsightsName')), '2020-02-02').ConnectionString), createObject('name', 'AzureWebJobsStorage', 'value', format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2022-09-01').keys[1].value)), createObject('name', 'FUNCTIONS_EXTENSION_VERSION', 'value', '~4'), createObject('name', 'FUNCTIONS_WORKER_RUNTIME', 'value', 'dotnet-isolated'), createObject('name', 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING', 'value', format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2022-09-01').keys[1].value)), createObject('name', 'WEBSITE_CONTENTSHARE', 'value', variables('functionAppName')), createObject('name', 'WEBSITE_MOUNT_ENABLED', 'value', '1'), createObject('name', 'WEBSITE_RUN_FROM_PACKAGE', 'value', 'https://github.com/viedoc/ctms-bridge/releases/download/0.0.1/viedoc-ctms-bridge-20230507093712.zip'), createObject('name', 'DataBridge__AppSettingsFile', 'value', 'appsettings.json'), createObject('name', 'DataBridge__BasePath', 'value', '/data'), createObject('name', 'DataBridge__ExportConsoleExecutable', 'value', 'Viedoc.Export.Console'), createObject('name', 'DataBridge__ExportConsoleExecutableFolder', 'value', ''), createObject('name', 'DataBridge__MappingsFolder', 'value', ''), createObject('name', 'DataBridge__SyncInterval', 'value', '0 */20 * * * *'), createObject('name', 'ViedocExportConsole__ClientId', 'value', parameters('ViedocApiClientId')), createObject('name', 'ViedocExportConsole__ClientSecret', 'value', parameters('ViedocApiClientSecret')), createObject('name', 'ViedocExportConsole__ApiUrl', 'value', parameters('ViedocApiUrl')), createObject('name', 'ViedocExportConsole__TokenUrl', 'value', parameters('ViedocApiTokenUrl'))))]"
         },
         "scmSiteAlsoStopped": false,
         "clientAffinityEnabled": false,
@@ -211,7 +289,9 @@
       "dependsOn": [
         "[resourceId('Microsoft.Insights/components', variables('applicationInsightsName'))]",
         "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
-        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('userSecrets')[1].name)]",
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('userSecrets')[0].name)]"
       ]
     },
     {
@@ -264,6 +344,20 @@
       "dependsOn": [
         "[resourceId('Microsoft.Web/sites', variables('functionAppName'))]",
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[format('Microsoft.KeyVault/vaults/{0}', variables('keyVaultName'))]",
+      "name": "[guid('SecretsUser', variables('functionAppName'))]",
+      "properties": {
+        "principalId": "[reference(resourceId('Microsoft.Web/sites', variables('functionAppName')), '2022-09-01', 'full').identity.principalId]",
+        "roleDefinitionId": "[variables('KEY_VAULT_SECRETS_USER_ROLE_GUID')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('functionAppName'))]",
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
       ]
     },
     {

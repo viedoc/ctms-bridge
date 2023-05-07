@@ -4,6 +4,14 @@ param location string = resourceGroup().location
 var random = uniqueString(subscription().id)
 var prefix = 'viedoc-ctms-bridge-'
 
+@secure()
+param ViedocApiClientId string = '92ac892a-f27c-4931-b9bc-1f4f66e30743'
+@secure()
+param ViedocApiClientSecret string = 'bV_tWwfjrVgdaOHm8jTO9aSZtisrkTw8u2kokfZrxFw'
+
+param ViedocApiUrl string = 'https://externaltest4api.viedoc.net'
+param ViedocApiTokenUrl string = 'https://externaltest4sts.viedoc.net/connect/token'
+
 param secret1Name string = 'BsiClientId'
 @secure()
 param secret1Value string = 'ctms_api_user'
@@ -22,27 +30,23 @@ param secret2Value string = '62lmGf$gfK!a27Fmgd'
 //   }
 // ]
 
-var secrets = [
+var userSecrets = [
   {
-    name: secret1Name
+    name: 'UserSecret__${secret1Name}'
     value: secret1Value
   }
   {
-    name: secret2Name
+    name: 'UserSecret__${secret2Name}'
     value: secret2Value
   }
 ]
-
-var userSecrets = filter(map(secrets, secret => {
-      name: 'UserSecret__${secret.name}'
-      value: secret.value
-    }), secret => !empty(secret.value))
 
 var defaultName = '${prefix}${random}'
 var storageAccountName = take(toLower(replace('${defaultName}', '-', '')), 23)
 var fileShareName = 'data'
 var workspaceName = '${defaultName}-log-analytics'
 var applicationInsightsName = '${defaultName}-insights'
+var keyVaultName = '${defaultName}-vault'
 var appServicePlanName = '${defaultName}-farm'
 var functionAppName = defaultName
 
@@ -134,6 +138,54 @@ resource ai 'Microsoft.Insights/components@2020-02-02' = {
   }
 }
 
+// Key vault
+resource keyVault 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
+  name: keyVaultName
+  location: location
+  properties: {
+    enabledForDeployment: false
+    enabledForDiskEncryption: false
+    enabledForTemplateDeployment: true
+    tenantId: subscription().tenantId
+    enableSoftDelete: true
+    softDeleteRetentionInDays: 7
+    enableRbacAuthorization: true
+    accessPolicies: []
+    sku: {
+      name: 'standard'
+      family: 'A'
+    }
+    networkAcls: {
+      defaultAction: 'Allow'
+      bypass: 'AzureServices'
+    }
+  }
+}
+
+resource apiClientIdSecret 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  parent: keyVault
+  name: 'viedoc-api-client-id'
+  properties: {
+    value: secret1Value
+  }
+}
+
+resource apiClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  parent: keyVault
+  name: 'viedoc-api-client-secret'
+  properties: {
+    value: secret1Value
+  }
+}
+
+resource userSecretsSecrets 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = [for userSecret in userSecrets: {
+  parent: keyVault
+  name: userSecret.name
+  properties: {
+    value: userSecret.value
+  }
+}]
+
 // Server farm
 resource plan 'Microsoft.Web/serverfarms@2022-09-01' = {
   name: appServicePlanName
@@ -178,6 +230,14 @@ resource func 'Microsoft.Web/sites@2022-09-01' = {
       functionAppScaleLimit: 2
       minimumElasticInstanceCount: 0
       appSettings: union(userSecrets, [
+          {
+            name: userSecrets[0].name
+            value: '@Microsoft.KeyVault(SecretUri=${userSecretsSecrets[0].properties.secretUri})'
+          }
+          {
+            name: userSecrets[1].name
+            value: '@Microsoft.KeyVault(SecretUri=${userSecretsSecrets[1].properties.secretUri})'
+          }
           {
             name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
             value: ai.properties.ConnectionString
@@ -236,19 +296,19 @@ resource func 'Microsoft.Web/sites@2022-09-01' = {
           }
           {
             name: 'ViedocExportConsole__ClientId'
-            value: '92ac892a-f27c-4931-b9bc-1f4f66e30743'
+            value: ViedocApiClientId
           }
           {
             name: 'ViedocExportConsole__ClientSecret'
-            value: 'bV_tWwfjrVgdaOHm8jTO9aSZtisrkTw8u2kokfZrxFw'
+            value: ViedocApiClientSecret
           }
           {
             name: 'ViedocExportConsole__ApiUrl'
-            value: 'https://externaltest4api.viedoc.net'
+            value: ViedocApiUrl
           }
           {
             name: 'ViedocExportConsole__TokenUrl'
-            value: 'https://externaltest4sts.viedoc.net/connect/token'
+            value: ViedocApiTokenUrl
           }
         ])
     }
@@ -306,6 +366,17 @@ resource storageSetting 'Microsoft.Web/sites/config@2021-01-15' = {
       accountName: sa.name
       accessKey: storageAccountKey
     }
+  }
+}
+
+var KEY_VAULT_SECRETS_USER_ROLE_GUID = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')
+
+resource keyVaultWebsiteUser 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid('SecretsUser', func.name)
+  scope: keyVault
+  properties: {
+    principalId: func.identity.principalId
+    roleDefinitionId: KEY_VAULT_SECRETS_USER_ROLE_GUID
   }
 }
 
