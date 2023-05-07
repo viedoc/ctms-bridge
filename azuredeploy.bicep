@@ -299,10 +299,10 @@ resource func 'Microsoft.Web/sites@2022-09-01' = {
             name: 'ViedocExportConsole__ClientId'
             value: '@Microsoft.KeyVault(SecretUri=${apiClientIdSecret.properties.secretUri})'
           }
-          // {
-          //   name: 'ViedocExportConsole__ClientSecret'
-          //   value: '@Microsoft.KeyVault(SecretUri=${apiClientSecretSecret.properties.secretUri})'
-          // }
+          {
+            name: 'ViedocExportConsole__ClientSecret'
+            value: '@Microsoft.KeyVault(SecretUri=${apiClientSecretSecret.properties.secretUri})'
+          }
           {
             name: 'ViedocExportConsole__ApiUrl'
             value: ViedocApiUrl
