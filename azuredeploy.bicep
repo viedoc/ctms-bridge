@@ -231,10 +231,10 @@ resource func 'Microsoft.Web/sites@2022-09-01' = {
       functionAppScaleLimit: 2
       minimumElasticInstanceCount: 0
       appSettings: union(userSecrets, [
-          // {
-          //   name: userSecrets[0].name
-          //   value: '@Microsoft.KeyVault(SecretUri=${userSecretsSecrets[0].properties.secretUri})'
-          // }
+          {
+            name: userSecrets[0].name
+            value: '@Microsoft.KeyVault(SecretUri=${userSecretsSecrets[0].properties.secretUri})'
+          }
           // {
           //   name: userSecrets[1].name
           //   value: '@Microsoft.KeyVault(SecretUri=${userSecretsSecrets[1].properties.secretUri})'
