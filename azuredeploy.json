@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.17.1.54307",
-      "templateHash": "9042476247354107809"
+      "version": "0.16.2.56959",
+      "templateHash": "8077358651887134695"
     }
   },
   "parameters": {
@@ -22,11 +22,11 @@
     },
     "ViedocApiClientId": {
       "type": "securestring",
-      "defaultValue": "92ac892a-f27c-4931-b9bc-1f4f66e30743"
+      "defaultValue": ""
     },
     "ViedocApiClientSecret": {
       "type": "securestring",
-      "defaultValue": "bV_tWwfjrVgdaOHm8jTO9aSZtisrkTw8u2kokfZrxFw"
+      "defaultValue": ""
     },
     "ViedocApiUrl": {
       "type": "string",
@@ -42,7 +42,7 @@
     },
     "secret1Value": {
       "type": "securestring",
-      "defaultValue": "ctms_api_user"
+      "defaultValue": ""
     },
     "secret2Name": {
       "type": "string",
@@ -50,7 +50,7 @@
     },
     "secret2Value": {
       "type": "securestring",
-      "defaultValue": "62lmGf$gfK!a27Fmgd"
+      "defaultValue": ""
     }
   },
   "variables": {
@@ -484,7 +484,7 @@
             "secureValue": "[variables('fileShareName')]"
           }
         ],
-        "scriptContent": "    Invoke-WebRequest \"https://github.com/viedoc/Viedoc.Export.Console/releases/download/0.0.1/viedoc.export.console-linux-x64.zip\" -OutFile \"viedoc.export.console.zip\"\r\n    Expand-Archive -Path \"viedoc.export.console.zip\" -DestinationPath \".\" -Force\r\n    curl -sL https://aka.ms/InstallAzureCLIDeb | bash\r\n    az version\r\n    az storage file upload --source \"./Viedoc.Export.Console\" --share-name \"$($env:SHARE_NAME)\" \r\n    Write-Host \"Done\"\r\n    "
+        "scriptContent": "    Invoke-WebRequest \"https://github.com/viedoc/Viedoc.Export.Console/releases/download/0.0.1/viedoc.export.console-linux-x64.zip\" -OutFile \"viedoc.export.console.zip\"\n    Expand-Archive -Path \"viedoc.export.console.zip\" -DestinationPath \".\" -Force\n    curl -sL https://aka.ms/InstallAzureCLIDeb | bash\n    az version\n    az storage file upload --source \"./Viedoc.Export.Console\" --share-name \"$($env:SHARE_NAME)\" \n    Write-Host \"Done\"\n    "
       },
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', variables('storageAccountName'), 'default', variables('fileShareName'))]",
