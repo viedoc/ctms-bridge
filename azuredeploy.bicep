@@ -230,15 +230,15 @@ resource func 'Microsoft.Web/sites@2022-09-01' = {
       http20Enabled: true
       functionAppScaleLimit: 2
       minimumElasticInstanceCount: 0
-      appSettings: union(userSecrets, [
+      appSettings: [
           {
             name: userSecrets[0].name
             value: '@Microsoft.KeyVault(SecretUri=${userSecretsSecrets[0].properties.secretUri})'
           }
-          // {
-          //   name: userSecrets[1].name
-          //   value: '@Microsoft.KeyVault(SecretUri=${userSecretsSecrets[1].properties.secretUri})'
-          // }
+          {
+            name: userSecrets[1].name
+            value: '@Microsoft.KeyVault(SecretUri=${userSecretsSecrets[1].properties.secretUri})'
+          }
           {
             name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
             value: ai.properties.ConnectionString
@@ -311,7 +311,7 @@ resource func 'Microsoft.Web/sites@2022-09-01' = {
             name: 'ViedocExportConsole__TokenUrl'
             value: ViedocApiTokenUrl
           }
-        ])
+        ]
     }
     scmSiteAlsoStopped: false
     clientAffinityEnabled: false
