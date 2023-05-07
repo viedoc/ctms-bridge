@@ -180,7 +180,7 @@ resource apiClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2021-11-01-pre
 
 resource userSecretsSecrets 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = [for userSecret in userSecrets: {
   parent: keyVault
-  name: toLower(replace(userSecret.name,'__','-')
+  name: toLower(replace(userSecret.name,'__','-'))
   properties: {
     value: userSecret.value
   }
