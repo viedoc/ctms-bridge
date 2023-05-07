@@ -1,28 +1,45 @@
-
 @description('Resource group location')
 param location string = resourceGroup().location
 
 var random = uniqueString(subscription().id)
 var prefix = 'viedoc-ctms-bridge-'
 
-param secrets array = [
-  {  
-    name: 'BsiClientId'
-    value: 'ctms_api_user'
+param secret1Name string = 'BsiClientId'
+@secure()
+param secret1Value string = 'ctms_api_user'
+param secret2Name string = 'BsiClientSecret'
+@secure()
+param secret2Value string = '62lmGf$gfK!a27Fmgd'
+
+// param secrets array = [
+//   {
+//     name: 'BsiClientId'
+//     value: 'ctms_api_user'
+//   }
+//   {
+//     name: 'BsiClientSecret'
+//     value: '62lmGf$gfK!a27Fmgd'
+//   }
+// ]
+
+var secrets = [
+  {
+    name: secret1Name
+    value: secret1Value
   }
-  {  
-    name: 'BsiClientSecret'
-    value: '62lmGf$gfK!a27Fmgd'
+  {
+    name: secret2Name
+    value: secret2Value
   }
 ]
 
-var userSecrets = map(secrets, secret => {  
-    name: 'UserSecret__${secret.name}'
-    value: secret.value
-  })
+var userSecrets = filter(map(secrets, secret => {
+      name: 'UserSecret__${secret.name}'
+      value: secret.value
+    }), secret => !empty(secret.value))
 
 var defaultName = '${prefix}${random}'
-var storageAccountName = take(toLower(replace('${defaultName}','-','')),23)
+var storageAccountName = take(toLower(replace('${defaultName}', '-', '')), 23)
 var fileShareName = 'data'
 var workspaceName = '${defaultName}-log-analytics'
 var applicationInsightsName = '${defaultName}-insights'
@@ -122,14 +139,14 @@ resource plan 'Microsoft.Web/serverfarms@2022-09-01' = {
   name: appServicePlanName
   location: location
   kind: 'linux'
-  properties:{
+  properties: {
     reserved: true
-    
+
   }
   sku: {
     name: 'B1'
   }
-} 
+}
 
 // Function app
 var storageAccountKey = sa.listKeys().keys[1].value
@@ -161,79 +178,79 @@ resource func 'Microsoft.Web/sites@2022-09-01' = {
       functionAppScaleLimit: 2
       minimumElasticInstanceCount: 0
       appSettings: union(userSecrets, [
-        {
-          name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-          value: ai.properties.ConnectionString
-        }
-        {
-          name: 'AzureWebJobsStorage'
-          value: storageAccountConnectionString
-        }
-        {
-          name: 'FUNCTIONS_EXTENSION_VERSION'
-          value: '~4'
-        }
-        {
-          name: 'FUNCTIONS_WORKER_RUNTIME'
-          value: 'dotnet-isolated'
-        }
-        {
-          name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
-          value: storageAccountConnectionString
-        }
-        {
-          name: 'WEBSITE_CONTENTSHARE'
-          value: functionAppName
-        }
-        {
-          name: 'WEBSITE_MOUNT_ENABLED'
-          value: '1'
-        }
-        {
-          name: 'WEBSITE_RUN_FROM_PACKAGE'
-          value: 'https://github.com/viedoc/ctms-bridge/releases/download/0.0.1/viedoc-ctms-bridge-20230507093712.zip'
-        }
-        {
-          name: 'DataBridge__AppSettingsFile'
-          value: 'appsettings.json'
-        }
-        {
-          name: 'DataBridge__BasePath'
-          value: '/data'
-        }
-        {
-          name: 'DataBridge__ExportConsoleExecutable'
-          value: 'Viedoc.Export.Console'
-        }
-        {
-          name: 'DataBridge__ExportConsoleExecutableFolder'
-          value: ''
-        }
-        {
-          name: 'DataBridge__MappingsFolder'
-          value: ''
-        }
-        {
-          name: 'DataBridge__SyncInterval'
-          value: '0 */1 * * * *'
-        }
-        {
-          name: 'ViedocExportConsole__ClientId'
-          value: '92ac892a-f27c-4931-b9bc-1f4f66e30743'
-        }
-        {
-          name: 'ViedocExportConsole__ClientSecret'
-          value: 'bV_tWwfjrVgdaOHm8jTO9aSZtisrkTw8u2kokfZrxFw'
-        }
-        {
-          name: 'ViedocExportConsole__ApiUrl'
-          value: 'https://externaltest4api.viedoc.net'
-        }
-        {
-          name: 'ViedocExportConsole__TokenUrl'
-          value: 'https://externaltest4sts.viedoc.net/connect/token'
-        }
-      ])
+          {
+            name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+            value: ai.properties.ConnectionString
+          }
+          {
+            name: 'AzureWebJobsStorage'
+            value: storageAccountConnectionString
+          }
+          {
+            name: 'FUNCTIONS_EXTENSION_VERSION'
+            value: '~4'
+          }
+          {
+            name: 'FUNCTIONS_WORKER_RUNTIME'
+            value: 'dotnet-isolated'
+          }
+          {
+            name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
+            value: storageAccountConnectionString
+          }
+          {
+            name: 'WEBSITE_CONTENTSHARE'
+            value: functionAppName
+          }
+          {
+            name: 'WEBSITE_MOUNT_ENABLED'
+            value: '1'
+          }
+          {
+            name: 'WEBSITE_RUN_FROM_PACKAGE'
+            value: 'https://github.com/viedoc/ctms-bridge/releases/download/0.0.1/viedoc-ctms-bridge-20230507093712.zip'
+          }
+          {
+            name: 'DataBridge__AppSettingsFile'
+            value: 'appsettings.json'
+          }
+          {
+            name: 'DataBridge__BasePath'
+            value: '/data'
+          }
+          {
+            name: 'DataBridge__ExportConsoleExecutable'
+            value: 'Viedoc.Export.Console'
+          }
+          {
+            name: 'DataBridge__ExportConsoleExecutableFolder'
+            value: ''
+          }
+          {
+            name: 'DataBridge__MappingsFolder'
+            value: ''
+          }
+          {
+            name: 'DataBridge__SyncInterval'
+            value: '0 */20 * * * *'
+          }
+          {
+            name: 'ViedocExportConsole__ClientId'
+            value: '92ac892a-f27c-4931-b9bc-1f4f66e30743'
+          }
+          {
+            name: 'ViedocExportConsole__ClientSecret'
+            value: 'bV_tWwfjrVgdaOHm8jTO9aSZtisrkTw8u2kokfZrxFw'
+          }
+          {
+            name: 'ViedocExportConsole__ApiUrl'
+            value: 'https://externaltest4api.viedoc.net'
+          }
+          {
+            name: 'ViedocExportConsole__TokenUrl'
+            value: 'https://externaltest4sts.viedoc.net/connect/token'
+          }
+        ])
     }
     scmSiteAlsoStopped: false
     clientAffinityEnabled: false
@@ -286,7 +303,7 @@ resource storageSetting 'Microsoft.Web/sites/config@2021-01-15' = {
       type: 'AzureFiles'
       shareName: fileShareName
       mountPath: '/data'
-      accountName: sa.name      
+      accountName: sa.name
       accessKey: storageAccountKey
     }
   }
