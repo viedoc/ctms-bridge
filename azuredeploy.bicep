@@ -145,7 +145,7 @@ resource apiClientIdSecret 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview
   parent: keyVault
   name: 'viedoc-api-client-id'
   properties: {
-    value: secret1Value
+    value: ViedocApiClientId
   }
 }
 
@@ -153,7 +153,7 @@ resource apiClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2021-11-01-pre
   parent: keyVault
   name: 'viedoc-api-client-secret'
   properties: {
-    value: secret1Value
+    value: ViedocApiClientSecret
   }
 }
 
