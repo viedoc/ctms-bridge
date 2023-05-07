@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.17.1.54307",
-      "templateHash": "14328313593383950650"
+      "templateHash": "9042476247354107809"
     }
   },
   "parameters": {
@@ -15,6 +15,10 @@
       "metadata": {
         "description": "Resource group location"
       }
+    },
+    "createKeyVaultSecrets": {
+      "type": "bool",
+      "defaultValue": false
     },
     "ViedocApiClientId": {
       "type": "securestring",
@@ -60,16 +64,12 @@
     "keyVaultName": "[format('v-{0}-vault', variables('random'))]",
     "appServicePlanName": "[format('{0}-farm', variables('defaultName'))]",
     "functionAppName": "[variables('defaultName')]",
-    "userSecrets": [
-      {
-        "name": "[format('UserSecret__{0}', parameters('secret1Name'))]",
-        "value": "[parameters('secret1Value')]"
-      },
-      {
-        "name": "[format('UserSecret__{0}', parameters('secret2Name'))]",
-        "value": "[parameters('secret2Value')]"
-      }
-    ],
+    "viedocApiClientIdKvSecretName": "viedoc-api-client-id",
+    "viedocClientSecretKvSecretName": "viedoc-api-client-secret",
+    "userSecret1Name": "[format('UserSecret__{0}', parameters('secret1Name'))]",
+    "userSecret1KvName": "[toLower(replace(variables('userSecret1Name'), '__', '-'))]",
+    "userSecret2Name": "[format('UserSecret__{0}', parameters('secret2Name'))]",
+    "userSecret2KvName": "[toLower(replace(variables('userSecret2Name'), '__', '-'))]",
     "alwaysOn": true,
     "KEY_VAULT_SECRETS_USER_ROLE_GUID": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')]"
   },
@@ -199,9 +199,34 @@
       }
     },
     {
+      "condition": "[parameters('createKeyVaultSecrets')]",
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2021-11-01-preview",
-      "name": "[format('{0}/{1}', variables('keyVaultName'), 'viedoc-api-client-id')]",
+      "name": "[format('{0}/{1}', variables('keyVaultName'), variables('viedocApiClientIdKvSecretName'))]",
+      "properties": {
+        "value": "[parameters('ViedocApiClientId')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
+      ]
+    },
+    {
+      "condition": "[parameters('createKeyVaultSecrets')]",
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2021-11-01-preview",
+      "name": "[format('{0}/{1}', variables('keyVaultName'), variables('viedocClientSecretKvSecretName'))]",
+      "properties": {
+        "value": "[parameters('ViedocApiClientSecret')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
+      ]
+    },
+    {
+      "condition": "[parameters('createKeyVaultSecrets')]",
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2021-11-01-preview",
+      "name": "[format('{0}/{1}', variables('keyVaultName'), variables('userSecret1KvName'))]",
       "properties": {
         "value": "[parameters('secret1Value')]"
       },
@@ -210,33 +235,12 @@
       ]
     },
     {
+      "condition": "[parameters('createKeyVaultSecrets')]",
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2021-11-01-preview",
-      "name": "[format('{0}/{1}', variables('keyVaultName'), 'viedoc-api-client-secret')]",
+      "name": "[format('{0}/{1}', variables('keyVaultName'), variables('userSecret2KvName'))]",
       "properties": {
-        "value": "[parameters('secret1Value')]"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2021-11-01-preview",
-      "name": "[format('{0}/{1}', variables('keyVaultName'), toLower(replace(variables('userSecrets')[0].name, '__', '-')))]",
-      "properties": {
-        "value": "[variables('userSecrets')[0].value]"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2021-11-01-preview",
-      "name": "[format('{0}/{1}', variables('keyVaultName'), toLower(replace(variables('userSecrets')[1].name, '__', '-')))]",
-      "properties": {
-        "value": "[variables('userSecrets')[1].value]"
+        "value": "[parameters('secret2Value')]"
       },
       "dependsOn": [
         "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
@@ -283,12 +287,12 @@
           "minimumElasticInstanceCount": 0,
           "appSettings": [
             {
-              "name": "[variables('userSecrets')[0].name]",
-              "value": "[format('@Microsoft.KeyVault(SecretUri={0})', reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), toLower(replace(variables('userSecrets')[0].name, '__', '-'))), '2021-11-01-preview').secretUri)]"
+              "name": "[variables('userSecret1Name')]",
+              "value": "[format('@Microsoft.KeyVault(SecretUri={0}/{1}}})', reference(resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName')), '2021-11-01-preview').vaultUri, variables('userSecret1KvName'))]"
             },
             {
-              "name": "[variables('userSecrets')[1].name]",
-              "value": "[format('@Microsoft.KeyVault(SecretUri={0})', reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), toLower(replace(variables('userSecrets')[1].name, '__', '-'))), '2021-11-01-preview').secretUri)]"
+              "name": "[variables('userSecret2Name')]",
+              "value": "[format('@Microsoft.KeyVault(SecretUri={0}/{1})', reference(resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName')), '2021-11-01-preview').vaultUri, variables('userSecret2KvName'))]"
             },
             {
               "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
@@ -348,11 +352,11 @@
             },
             {
               "name": "ViedocExportConsole__ClientId",
-              "value": "[format('@Microsoft.KeyVault(SecretUri={0})', reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), 'viedoc-api-client-id'), '2021-11-01-preview').secretUri)]"
+              "value": "[format('@Microsoft.KeyVault(SecretUri={0}/{1})', reference(resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName')), '2021-11-01-preview').vaultUri, variables('viedocApiClientIdKvSecretName'))]"
             },
             {
               "name": "ViedocExportConsole__ClientSecret",
-              "value": "[format('@Microsoft.KeyVault(SecretUri={0})', reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), 'viedoc-api-client-secret'), '2021-11-01-preview').secretUri)]"
+              "value": "[format('@Microsoft.KeyVault(SecretUri={0}/{1})', reference(resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName')), '2021-11-01-preview').vaultUri, variables('viedocApiClientIdKvSecretName'))]"
             },
             {
               "name": "ViedocExportConsole__ApiUrl",
@@ -376,12 +380,13 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.Insights/components', variables('applicationInsightsName'))]",
-        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), 'viedoc-api-client-id')]",
-        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), 'viedoc-api-client-secret')]",
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('viedocApiClientIdKvSecretName'))]",
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('viedocClientSecretKvSecretName'))]",
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]",
         "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
-        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), toLower(replace(variables('userSecrets')[0].name, '__', '-')))]",
-        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), toLower(replace(variables('userSecrets')[1].name, '__', '-')))]"
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('userSecret1KvName'))]",
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('userSecret2KvName'))]"
       ]
     },
     {

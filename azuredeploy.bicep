@@ -4,6 +4,8 @@ param location string = resourceGroup().location
 var random = uniqueString(subscription().id)
 var prefix = 'viedoc-ctms-bridge-'
 
+param createKeyVaultSecrets bool = false
+
 @secure()
 param ViedocApiClientId string = '92ac892a-f27c-4931-b9bc-1f4f66e30743'
 @secure()
@@ -141,48 +143,43 @@ resource keyVault 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
   }
 }
 
-resource apiClientIdSecret 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+var viedocApiClientIdKvSecretName = 'viedoc-api-client-id'
+var viedocClientSecretKvSecretName = 'viedoc-api-client-secret'
+resource apiClientIdSecret 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = if(createKeyVaultSecrets){
   parent: keyVault
-  name: 'viedoc-api-client-id'
+  name: viedocApiClientIdKvSecretName
   properties: {
     value: ViedocApiClientId
   }
 }
 
-resource apiClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+resource apiClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = if(createKeyVaultSecrets){
   parent: keyVault
-  name: 'viedoc-api-client-secret'
+  name: viedocClientSecretKvSecretName
   properties: {
     value: ViedocApiClientSecret
   }
 }
 
-var userSecrets = [
-  {
-    name: 'UserSecret__${secret1Name}'
+var userSecret1Name = 'UserSecret__${secret1Name}'
+var userSecret1KvName =  toLower(replace(userSecret1Name,'__','-'))
+var userSecret2Name = 'UserSecret__${secret2Name}'
+var userSecret2KvName = toLower(replace(userSecret2Name,'__','-'))
+
+resource userSecretsSecrets1 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = if(createKeyVaultSecrets) {
+  parent: keyVault
+  name: userSecret1KvName
+  properties: {
     value: secret1Value
   }
-  {
-    name: 'UserSecret__${secret2Name}'
+}
+resource userSecretsSecrets2 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = if(createKeyVaultSecrets) {
+  parent: keyVault
+  name: userSecret2KvName
+  properties: {
     value: secret2Value
   }
-]
-
-resource userSecretsSecrets1 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' =  {
-  parent: keyVault
-  name: toLower(replace(userSecrets[0].name,'__','-'))
-  properties: {
-    value: userSecrets[0].value
-  }
 }
-resource userSecretsSecrets2 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' =  {
-  parent: keyVault
-  name: toLower(replace(userSecrets[1].name,'__','-'))
-  properties: {
-    value: userSecrets[1].value
-  }
-}
-
 
 // Server farm
 resource plan 'Microsoft.Web/serverfarms@2022-09-01' = {
@@ -229,12 +226,12 @@ resource func 'Microsoft.Web/sites@2022-09-01' = {
       minimumElasticInstanceCount: 0
       appSettings: [
           {
-            name: userSecrets[0].name
-            value: '@Microsoft.KeyVault(SecretUri=${userSecretsSecrets1.properties.secretUri})'
+            name: userSecret1Name
+            value: '@Microsoft.KeyVault(SecretUri=${keyVault.properties.vaultUri}/${userSecret1KvName}})'
           }
           {
-            name: userSecrets[1].name
-            value: '@Microsoft.KeyVault(SecretUri=${userSecretsSecrets2.properties.secretUri})'
+            name: userSecret2Name
+            value: '@Microsoft.KeyVault(SecretUri=${keyVault.properties.vaultUri}/${userSecret2KvName})'
           }
           {
             name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
@@ -294,11 +291,11 @@ resource func 'Microsoft.Web/sites@2022-09-01' = {
           }
           {
             name: 'ViedocExportConsole__ClientId'
-            value: '@Microsoft.KeyVault(SecretUri=${apiClientIdSecret.properties.secretUri})'
+            value: '@Microsoft.KeyVault(SecretUri=${keyVault.properties.vaultUri}/${viedocApiClientIdKvSecretName})'
           }
           {
             name: 'ViedocExportConsole__ClientSecret'
-            value: '@Microsoft.KeyVault(SecretUri=${apiClientSecretSecret.properties.secretUri})'
+            value: '@Microsoft.KeyVault(SecretUri=${keyVault.properties.vaultUri}/${viedocApiClientIdKvSecretName})'
           }
           {
             name: 'ViedocExportConsole__ApiUrl'
@@ -321,6 +318,10 @@ resource func 'Microsoft.Web/sites@2022-09-01' = {
     keyVaultReferenceIdentity: 'SystemAssigned'
   }
   dependsOn: [
+    apiClientIdSecret
+    apiClientSecretSecret
+    userSecretsSecrets1
+    userSecretsSecrets2
   ]
 }
 
