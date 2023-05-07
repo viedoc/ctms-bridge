@@ -17,8 +17,8 @@ param secrets array = [
 ]
 
 var userSecrets = [ for x in secrets:{  
-    name: 'UserSecret__${x}'
-    value: secrets[x]
+    name: 'UserSecret__${x.name}'
+    value: x.value
   }]
 
 var defaultName = '${prefix}${random}'

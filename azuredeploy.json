@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.17.1.54307",
-      "templateHash": "4819844068551256038"
+      "templateHash": "575077851778430412"
     }
   },
   "parameters": {
@@ -36,8 +36,8 @@
         "name": "userSecrets",
         "count": "[length(parameters('secrets'))]",
         "input": {
-          "name": "[format('UserSecret__{0}', parameters('secrets')[copyIndex('userSecrets')])]",
-          "value": "[parameters('secrets')[parameters('secrets')[copyIndex('userSecrets')]]]"
+          "name": "[format('UserSecret__{0}', parameters('secrets')[copyIndex('userSecrets')].name)]",
+          "value": "[parameters('secrets')[copyIndex('userSecrets')].value]"
         }
       }
     ],
