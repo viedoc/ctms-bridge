@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.17.1.54307",
-      "templateHash": "2969397019545911540"
+      "templateHash": "14328313593383950650"
     }
   },
   "parameters": {
@@ -221,15 +221,22 @@
       ]
     },
     {
-      "copy": {
-        "name": "userSecretsSecrets",
-        "count": "[length(variables('userSecrets'))]"
-      },
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2021-11-01-preview",
-      "name": "[format('{0}/{1}', variables('keyVaultName'), toLower(replace(variables('userSecrets')[copyIndex()].name, '__', '-')))]",
+      "name": "[format('{0}/{1}', variables('keyVaultName'), toLower(replace(variables('userSecrets')[0].name, '__', '-')))]",
       "properties": {
-        "value": "[variables('userSecrets')[copyIndex()].value]"
+        "value": "[variables('userSecrets')[0].value]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2021-11-01-preview",
+      "name": "[format('{0}/{1}', variables('keyVaultName'), toLower(replace(variables('userSecrets')[1].name, '__', '-')))]",
+      "properties": {
+        "value": "[variables('userSecrets')[1].value]"
       },
       "dependsOn": [
         "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
@@ -373,7 +380,8 @@
         "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), 'viedoc-api-client-secret')]",
         "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
-        "userSecretsSecrets"
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), toLower(replace(variables('userSecrets')[0].name, '__', '-')))]",
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), toLower(replace(variables('userSecrets')[1].name, '__', '-')))]"
       ]
     },
     {
