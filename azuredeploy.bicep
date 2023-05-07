@@ -168,13 +168,21 @@ var userSecrets = [
   }
 ]
 
-resource userSecretsSecrets 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = [for userSecret in userSecrets: {
+resource userSecretsSecrets1 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' =  {
   parent: keyVault
-  name: toLower(replace(userSecret.name,'__','-'))
+  name: toLower(replace(userSecrets[0].name,'__','-'))
   properties: {
-    value: userSecret.value
+    value: userSecrets[0].value
   }
-}]
+}
+resource userSecretsSecrets2 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' =  {
+  parent: keyVault
+  name: toLower(replace(userSecrets[1].name,'__','-'))
+  properties: {
+    value: userSecrets[1].value
+  }
+}
+
 
 // Server farm
 resource plan 'Microsoft.Web/serverfarms@2022-09-01' = {
@@ -222,11 +230,11 @@ resource func 'Microsoft.Web/sites@2022-09-01' = {
       appSettings: [
           {
             name: userSecrets[0].name
-            value: '@Microsoft.KeyVault(SecretUri=${userSecretsSecrets[0].properties.secretUri})'
+            value: '@Microsoft.KeyVault(SecretUri=${userSecretsSecrets1.properties.secretUri})'
           }
           {
             name: userSecrets[1].name
-            value: '@Microsoft.KeyVault(SecretUri=${userSecretsSecrets[1].properties.secretUri})'
+            value: '@Microsoft.KeyVault(SecretUri=${userSecretsSecrets2.properties.secretUri})'
           }
           {
             name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
