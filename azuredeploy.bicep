@@ -46,7 +46,7 @@ var storageAccountName = take(toLower(replace('${defaultName}', '-', '')), 23)
 var fileShareName = 'data'
 var workspaceName = '${defaultName}-log-analytics'
 var applicationInsightsName = '${defaultName}-insights'
-var keyVaultName = '${defaultName}-vault'
+var keyVaultName = '${random}-vault'
 var appServicePlanName = '${defaultName}-farm'
 var functionAppName = defaultName
 
