@@ -1,0 +1,272 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "resourceTypes": [
+            "microsoft.resources/resourcegroups"
+        ],
+        "basics": [],
+        "steps": [
+            {
+                "name": "Secrets",
+                "label": "Secrets",
+                "elements": [
+                    {
+                        "name": "createKeyVaultSecrets",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Create Key Vault Secrets",
+                        "subLabel": "",
+                        "defaultValue": "false",
+                        "toolTip": "",
+                        "constraints": {
+                            "required": false,
+                            "allowedValues": [
+                                {
+                                    "label": "true",
+                                    "value": true
+                                },
+                                {
+                                    "label": "false",
+                                    "value": false
+                                }
+                            ],
+                            "validations": []
+                        },
+                        "infoMessages": [],
+                        "visible": true
+                    },
+                    {
+                        "name": "ViedocApiClientId",
+                        "type": "Microsoft.Common.PasswordBox",
+                        "label": {
+                            "password": "Viedoc Api Client Id",
+                            "confirmPassword": "Confirm password"
+                        },
+                        "defaultValue": "",
+                        "toolTip": "",
+                        "constraints": {
+                            "required": false,
+                            "regex": "",
+                            "validationMessage": "",
+                            "validations": []
+                        },
+                        "options": {
+                            "hideConfirmation": true
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "ViedocApiClientSecret",
+                        "type": "Microsoft.Common.PasswordBox",
+                        "label": {
+                            "password": "Viedoc Api Client Secret",
+                            "confirmPassword": "Confirm password"
+                        },
+                        "defaultValue": "",
+                        "toolTip": "",
+                        "constraints": {
+                            "required": false,
+                            "regex": "",
+                            "validationMessage": "",
+                            "validations": []
+                        },
+                        "options": {
+                            "hideConfirmation": true
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "ViedocApiUrl",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Viedoc Api Url",
+                        "subLabel": "",
+                        "defaultValue": "https://externaltest4api.viedoc.net",
+                        "toolTip": "",
+                        "constraints": {
+                            "required": false,
+                            "regex": "",
+                            "validationMessage": "",
+                            "validations": []
+                        },
+                        "infoMessages": [],
+                        "visible": true
+                    },
+                    {
+                        "name": "ViedocApiTokenUrl",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Viedoc Api Token Url",
+                        "subLabel": "",
+                        "defaultValue": "https://externaltest4sts.viedoc.net/connect/token",
+                        "toolTip": "",
+                        "constraints": {
+                            "required": false,
+                            "regex": "",
+                            "validationMessage": "",
+                            "validations": []
+                        },
+                        "infoMessages": [],
+                        "visible": true
+                    },
+                    {
+                        "name": "secret1Name",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Secret1Name",
+                        "subLabel": "",
+                        "defaultValue": "BsiClientId",
+                        "toolTip": "",
+                        "constraints": {
+                            "required": false,
+                            "regex": "",
+                            "validationMessage": "",
+                            "validations": []
+                        },
+                        "infoMessages": [],
+                        "visible": true
+                    },
+                    {
+                        "name": "secret1Value",
+                        "type": "Microsoft.Common.PasswordBox",
+                        "label": {
+                            "password": "Secret1Value",
+                            "confirmPassword": "Confirm password"
+                        },
+                        "defaultValue": "",
+                        "toolTip": "",
+                        "constraints": {
+                            "required": false,
+                            "regex": "",
+                            "validationMessage": "",
+                            "validations": []
+                        },
+                        "options": {
+                            "hideConfirmation": true
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "secret2Name",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Secret2Name",
+                        "subLabel": "",
+                        "defaultValue": "BsiClientSecret",
+                        "toolTip": "",
+                        "constraints": {
+                            "required": false,
+                            "regex": "",
+                            "validationMessage": "",
+                            "validations": []
+                        },
+                        "infoMessages": [],
+                        "visible": true
+                    },
+                    {
+                        "name": "secret2Value",
+                        "type": "Microsoft.Common.PasswordBox",
+                        "label": {
+                            "password": "Secret2Value",
+                            "confirmPassword": "Confirm password"
+                        },
+                        "defaultValue": "",
+                        "toolTip": "",
+                        "constraints": {
+                            "required": false,
+                            "regex": "",
+                            "validationMessage": "",
+                            "validations": []
+                        },
+                        "options": {
+                            "hideConfirmation": true
+                        },
+                        "visible": true
+                    }
+                ]
+            },
+            {
+                "name": "configuration-files",
+                "label": "Configuration and mapping files",
+                "elements": [
+                    {
+                        "name": "appsettings",
+                        "type": "Microsoft.Common.FileUpload",
+                        "label": "appsettings.json",
+                        "toolTip": "",
+                        "constraints": {
+                            "required": true,
+                            "accept": "appsettings.json"
+                        },
+                        "options": {
+                            "multiple": false,
+                            "uploadMode": "url",
+                            "openMode": "text",
+                            "encoding": "UTF-8"
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "exportMappings",
+                        "type": "Microsoft.Common.FileUpload",
+                        "label": "Export mappings",
+                        "toolTip": "",
+                        "constraints": {
+                            "required": true,
+                            "accept": ".xml"
+                        },
+                        "options": {
+                            "multiple": true,
+                            "uploadMode": "url",
+                            "openMode": "text",
+                            "encoding": "UTF-8"
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "apiMappings",
+                        "type": "Microsoft.Common.FileUpload",
+                        "label": "API mappings",
+                        "toolTip": "",
+                        "constraints": {
+                            "required": true,
+                            "accept": ".json"
+                        },
+                        "options": {
+                            "multiple": true,
+                            "uploadMode": "url",
+                            "openMode": "text",
+                            "encoding": "UTF-8"
+                        },
+                        "visible": true
+                    }
+                ]
+            },
+            {
+                "name": "tags",
+                "label": "Tags",
+                "elements": [
+                    {
+                        "name": "tagsByResource",
+                        "type": "Microsoft.Common.TagsByResource",
+                        "resources": [
+                            "Microsoft.Storage/storageAccounts",
+                            "Microsoft.Compute/virtualMachines"
+                        ]
+                    }
+                ]
+            }
+        ],
+        "outputs": {
+            "createKeyVaultSecrets": "[steps('Secrets').createKeyVaultSecrets]",
+            "ViedocApiClientId": "[steps('Secrets').ViedocApiClientId]",
+            "ViedocApiClientSecret": "[steps('Secrets').ViedocApiClientSecret]",
+            "ViedocApiUrl": "[steps('Secrets').ViedocApiUrl]",
+            "ViedocApiTokenUrl": "[steps('Secrets').ViedocApiTokenUrl]",
+            "secret1Name": "[steps('Secrets').secret1Name]",
+            "secret1Value": "[steps('Secrets').secret1Value]",
+            "secret2Name": "[steps('Secrets').secret2Name]",
+            "secret2Value": "[steps('Secrets').secret2Value]",
+            "appsettingsFile": "[steps('configuration-files').appsettings]",
+            "exportMappingFiles" : "[steps('configuration-files').exportMappings]",
+            "apiMappingFiles": "[steps('configuration-files').apiMappings]"
+        }
+    }
+}
