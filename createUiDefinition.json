@@ -265,7 +265,7 @@
             "secret2Name": "[steps('Secrets').secret2Name]",
             "secret2Value": "[steps('Secrets').secret2Value]",
             "appsettingsFile": "[steps('configuration-files').appsettings]",
-            "exportMappingFiles" : "[steps('configuration-files').exportMappings]",
+            "exportMappingFiles": "[steps('configuration-files').exportMappings]",
             "apiMappingFiles": "[steps('configuration-files').apiMappings]"
         }
     }
