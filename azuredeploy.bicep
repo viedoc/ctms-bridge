@@ -1,7 +1,7 @@
 @description('Resource group location')
 param location string = resourceGroup().location
 
-var random = uniqueString(subscription().id)
+var random = uniqueString(resourceGroup().id)
 var prefix = 'viedoc-ctms-bridge-'
 
 param createKeyVaultSecrets bool = false
