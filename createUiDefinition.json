@@ -263,10 +263,7 @@
             "secret1Name": "[steps('Secrets').secret1Name]",
             "secret1Value": "[steps('Secrets').secret1Value]",
             "secret2Name": "[steps('Secrets').secret2Name]",
-            "secret2Value": "[steps('Secrets').secret2Value]",
-            "appsettingsFile": "[steps('configuration-files').appsettings]",
-            "exportMappingFiles" : "[steps('configuration-files').exportMappings]",
-            "apiMappingFiles": "[steps('configuration-files').apiMappings]"
+            "secret2Value": "[steps('Secrets').secret2Value]"
         }
     }
 }

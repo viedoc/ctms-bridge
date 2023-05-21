@@ -24,10 +24,9 @@ param secret2Name string = 'BsiClientSecret'
 @secure()
 param secret2Value string = ''
 
-param appsettingsFile string = ''
-
-param exportMappingFiles array = []
-param apiMappingFiles array = []
+// param appsettingsFile string = ''
+// param exportMappingFiles array = []
+// param apiMappingFiles array = []
 
 var defaultName = '${prefix}${random}'
 var storageAccountName = take(toLower(replace('${defaultName}', '-', '')), 23)
@@ -416,14 +415,6 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
         name: 'SHARE_NAME'
         secureValue: fileShareName
       }
-      {
-        name: 'APP_SETTINGS_FILE_URI'
-        secureValue: uriComponent(appsettingsFile)
-      }
-      {
-        name: 'EXPORT_MAPPING_FILES'
-        secureValue: exportMappingFiles
-      }
     ]
     scriptContent: '''
     Invoke-WebRequest "https://github.com/viedoc/Viedoc.Export.Console/releases/download/0.0.1/viedoc.export.console-linux-x64.zip" -OutFile "viedoc.export.console.zip"
@@ -431,8 +422,6 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
     curl -sL https://aka.ms/InstallAzureCLIDeb | bash
     az version
     az storage file upload --source "./Viedoc.Export.Console" --share-name "$($env:SHARE_NAME)" 
-    az storage file copy start --source-uri "$($env:APP_SETTINGS_FILE_URI)" --destination-share "$($env:SHARE_NAME)" 
-    foreach($file in )
     Write-Host "Done"
     '''
   }
@@ -441,50 +430,50 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   ]
 }
 
-var files = concat([appsettingsFile], exportMappingFiles, apiMappingFiles)
+// var files = concat([appsettingsFile], exportMappingFiles, apiMappingFiles)
 
-resource deploymentScript2 'Microsoft.Resources/deploymentScripts@2020-10-01' = [for f in files:{
-  name: 'deployscript-upload-blob-${f}'
-  location: location
-  kind: 'AzurePowerShell'
-  properties: {
-    azPowerShellVersion: '7.0'
-    timeout: 'PT5M'
-    retentionInterval: 'PT1H'
-    cleanupPreference: 'OnSuccess'
-    environmentVariables: [
-      {
-        name: 'FILESHARE_URL'
-        secureValue: 'https://${storageAccountName}.file.${environment().suffixes.storage}/${fileShareName}'
-      }
-      {
-        name: 'AZURE_STORAGE_KEY'
-        secureValue: storageAccountKey
-      }
-      {
-        name: 'AZURE_STORAGE_ACCOUNT'
-        secureValue: storageAccountName
-      }
-      {
-        name: 'SHARE_NAME'
-        secureValue: fileShareName
-      }
-      {
-        name: 'FILE_URI'
-        secureValue: uriComponent(f)
-      }
-    ]
-    scriptContent: '''
-    curl -sL https://aka.ms/InstallAzureCLIDeb | bash
-    az version
-    az storage file copy start --source-uri "$($env:FILE_URI)" --destination-share "$($env:SHARE_NAME)" 
-    Write-Host "Done"
-    '''
-  }
-  dependsOn: [
-    fileShare
-  ]
-}]
+// resource deploymentScript2 'Microsoft.Resources/deploymentScripts@2020-10-01' = [for f in files:{
+//   name: 'deployscript-upload-blob-${f}'
+//   location: location
+//   kind: 'AzurePowerShell'
+//   properties: {
+//     azPowerShellVersion: '7.0'
+//     timeout: 'PT5M'
+//     retentionInterval: 'PT1H'
+//     cleanupPreference: 'OnSuccess'
+//     environmentVariables: [
+//       {
+//         name: 'FILESHARE_URL'
+//         secureValue: 'https://${storageAccountName}.file.${environment().suffixes.storage}/${fileShareName}'
+//       }
+//       {
+//         name: 'AZURE_STORAGE_KEY'
+//         secureValue: storageAccountKey
+//       }
+//       {
+//         name: 'AZURE_STORAGE_ACCOUNT'
+//         secureValue: storageAccountName
+//       }
+//       {
+//         name: 'SHARE_NAME'
+//         secureValue: fileShareName
+//       }
+//       {
+//         name: 'FILE_URI'
+//         secureValue: uriComponent(f)
+//       }
+//     ]
+//     scriptContent: '''
+//     curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+//     az version
+//     az storage file copy start --source-uri "$($env:FILE_URI)" --destination-share "$($env:SHARE_NAME)" 
+//     Write-Host "Done"
+//     '''
+//   }
+//   dependsOn: [
+//     fileShare
+//   ]
+// }]
 
 
 output storageAccountName string = storageAccountName
