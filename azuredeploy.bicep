@@ -430,52 +430,6 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   ]
 }
 
-// var files = concat([appsettingsFile], exportMappingFiles, apiMappingFiles)
-
-// resource deploymentScript2 'Microsoft.Resources/deploymentScripts@2020-10-01' = [for f in files:{
-//   name: 'deployscript-upload-blob-${f}'
-//   location: location
-//   kind: 'AzurePowerShell'
-//   properties: {
-//     azPowerShellVersion: '7.0'
-//     timeout: 'PT5M'
-//     retentionInterval: 'PT1H'
-//     cleanupPreference: 'OnSuccess'
-//     environmentVariables: [
-//       {
-//         name: 'FILESHARE_URL'
-//         secureValue: 'https://${storageAccountName}.file.${environment().suffixes.storage}/${fileShareName}'
-//       }
-//       {
-//         name: 'AZURE_STORAGE_KEY'
-//         secureValue: storageAccountKey
-//       }
-//       {
-//         name: 'AZURE_STORAGE_ACCOUNT'
-//         secureValue: storageAccountName
-//       }
-//       {
-//         name: 'SHARE_NAME'
-//         secureValue: fileShareName
-//       }
-//       {
-//         name: 'FILE_URI'
-//         secureValue: uriComponent(f)
-//       }
-//     ]
-//     scriptContent: '''
-//     curl -sL https://aka.ms/InstallAzureCLIDeb | bash
-//     az version
-//     az storage file copy start --source-uri "$($env:FILE_URI)" --destination-share "$($env:SHARE_NAME)" 
-//     Write-Host "Done"
-//     '''
-//   }
-//   dependsOn: [
-//     fileShare
-//   ]
-// }]
-
-
 output storageAccountName string = storageAccountName
 output storageAccountId string = sa.id
 output url string = 'https://${func.properties.defaultHostName}'
