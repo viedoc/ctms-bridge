@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.16.2.56959",
-      "templateHash": "8077358651887134695"
+      "version": "0.17.1.54307",
+      "templateHash": "14614314888430858941"
     }
   },
   "parameters": {
@@ -51,6 +51,18 @@
     "secret2Value": {
       "type": "securestring",
       "defaultValue": ""
+    },
+    "appsettingsFile": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "exportMappingFiles": {
+      "type": "array",
+      "defaultValue": []
+    },
+    "apiMappingFiles": {
+      "type": "array",
+      "defaultValue": []
     }
   },
   "variables": {
@@ -70,8 +82,9 @@
     "userSecret1KvName": "[toLower(replace(variables('userSecret1Name'), '__', '-'))]",
     "userSecret2Name": "[format('UserSecret__{0}', parameters('secret2Name'))]",
     "userSecret2KvName": "[toLower(replace(variables('userSecret2Name'), '__', '-'))]",
-    "alwaysOn": true,
-    "KEY_VAULT_SECRETS_USER_ROLE_GUID": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')]"
+    "alwaysOn": false,
+    "KEY_VAULT_SECRETS_USER_ROLE_GUID": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')]",
+    "files": "[concat(createArray(parameters('appsettingsFile')), parameters('exportMappingFiles'), parameters('apiMappingFiles'))]"
   },
   "resources": [
     {
@@ -247,19 +260,6 @@
       ]
     },
     {
-      "type": "Microsoft.Web/serverfarms",
-      "apiVersion": "2022-09-01",
-      "name": "[variables('appServicePlanName')]",
-      "location": "[parameters('location')]",
-      "kind": "linux",
-      "properties": {
-        "reserved": true
-      },
-      "sku": {
-        "name": "B1"
-      }
-    },
-    {
       "type": "Microsoft.Web/sites",
       "apiVersion": "2022-09-01",
       "name": "[variables('functionAppName')]",
@@ -269,7 +269,6 @@
         "type": "SystemAssigned"
       },
       "properties": {
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
         "enabled": true,
         "reserved": true,
         "isXenon": false,
@@ -383,7 +382,6 @@
         "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('viedocApiClientIdKvSecretName'))]",
         "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('viedocClientSecretKvSecretName'))]",
         "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]",
-        "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
         "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('userSecret1KvName'))]",
         "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('userSecret2KvName'))]"
@@ -482,9 +480,61 @@
           {
             "name": "SHARE_NAME",
             "secureValue": "[variables('fileShareName')]"
+          },
+          {
+            "name": "APP_SETTINGS_FILE_URI",
+            "secureValue": "[uriComponent(parameters('appsettingsFile'))]"
+          },
+          {
+            "name": "EXPORT_MAPPING_FILES",
+            "secureValue": "[parameters('exportMappingFiles')]"
           }
         ],
-        "scriptContent": "    Invoke-WebRequest \"https://github.com/viedoc/Viedoc.Export.Console/releases/download/0.0.1/viedoc.export.console-linux-x64.zip\" -OutFile \"viedoc.export.console.zip\"\n    Expand-Archive -Path \"viedoc.export.console.zip\" -DestinationPath \".\" -Force\n    curl -sL https://aka.ms/InstallAzureCLIDeb | bash\n    az version\n    az storage file upload --source \"./Viedoc.Export.Console\" --share-name \"$($env:SHARE_NAME)\" \n    Write-Host \"Done\"\n    "
+        "scriptContent": "    Invoke-WebRequest \"https://github.com/viedoc/Viedoc.Export.Console/releases/download/0.0.1/viedoc.export.console-linux-x64.zip\" -OutFile \"viedoc.export.console.zip\"\n    Expand-Archive -Path \"viedoc.export.console.zip\" -DestinationPath \".\" -Force\n    curl -sL https://aka.ms/InstallAzureCLIDeb | bash\n    az version\n    az storage file upload --source \"./Viedoc.Export.Console\" --share-name \"$($env:SHARE_NAME)\" \n    az storage file copy start --source-uri \"$($env:APP_SETTINGS_FILE_URI)\" --destination-share \"$($env:SHARE_NAME)\" \n    foreach($file in )\n    Write-Host \"Done\"\n    "
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', variables('storageAccountName'), 'default', variables('fileShareName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+      ]
+    },
+    {
+      "copy": {
+        "name": "deploymentScript2",
+        "count": "[length(variables('files'))]"
+      },
+      "type": "Microsoft.Resources/deploymentScripts",
+      "apiVersion": "2020-10-01",
+      "name": "[format('deployscript-upload-blob-{0}', variables('files')[copyIndex()])]",
+      "location": "[parameters('location')]",
+      "kind": "AzurePowerShell",
+      "properties": {
+        "azPowerShellVersion": "7.0",
+        "timeout": "PT5M",
+        "retentionInterval": "PT1H",
+        "cleanupPreference": "OnSuccess",
+        "environmentVariables": [
+          {
+            "name": "FILESHARE_URL",
+            "secureValue": "[format('https://{0}.file.{1}/{2}', variables('storageAccountName'), environment().suffixes.storage, variables('fileShareName'))]"
+          },
+          {
+            "name": "AZURE_STORAGE_KEY",
+            "secureValue": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2022-09-01').keys[1].value]"
+          },
+          {
+            "name": "AZURE_STORAGE_ACCOUNT",
+            "secureValue": "[variables('storageAccountName')]"
+          },
+          {
+            "name": "SHARE_NAME",
+            "secureValue": "[variables('fileShareName')]"
+          },
+          {
+            "name": "FILE_URI",
+            "secureValue": "[uriComponent(variables('files')[copyIndex()])]"
+          }
+        ],
+        "scriptContent": "    curl -sL https://aka.ms/InstallAzureCLIDeb | bash\n    az version\n    az storage file copy start --source-uri \"$($env:FILE_URI)\" --destination-share \"$($env:SHARE_NAME)\" \n    Write-Host \"Done\"\n    "
       },
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', variables('storageAccountName'), 'default', variables('fileShareName'))]",
