@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.17.1.54307",
-      "templateHash": "1704201163493480507"
+      "templateHash": "18137647682772084967"
     }
   },
   "parameters": {
@@ -54,7 +54,7 @@
     }
   },
   "variables": {
-    "random": "[uniqueString(subscription().id)]",
+    "random": "[uniqueString(resourceGroup().id)]",
     "prefix": "viedoc-ctms-bridge-",
     "defaultName": "[format('{0}{1}', variables('prefix'), variables('random'))]",
     "storageAccountName": "[take(toLower(replace(format('{0}', variables('defaultName')), '-', '')), 23)]",
