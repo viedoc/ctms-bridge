@@ -189,23 +189,23 @@ resource userSecretsSecrets2 'Microsoft.KeyVault/vaults/secrets@2021-11-01-previ
 }
 
 // Server farm
-resource plan 'Microsoft.Web/serverfarms@2022-09-01' = {
-  name: appServicePlanName
-  location: location
-  kind: 'linux'
-  properties: {
-    reserved: true
+// resource plan 'Microsoft.Web/serverfarms@2022-09-01' = {
+//   name: appServicePlanName
+//   location: location
+//   kind: 'linux'
+//   properties: {
+//     reserved: true
 
-  }
-  sku: {
-    name: 'B1'
-  }
-}
+//   }
+//   sku: {
+//     name: 'B1'
+//   }
+// }
 
 // Function app
 var storageAccountKey = sa.listKeys().keys[1].value
 var storageAccountConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${sa.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storageAccountKey}'
-var alwaysOn = true
+var alwaysOn = false
 
 resource func 'Microsoft.Web/sites@2022-09-01' = {
   name: functionAppName
@@ -215,7 +215,7 @@ resource func 'Microsoft.Web/sites@2022-09-01' = {
     type: 'SystemAssigned'
   }
   properties: {
-    serverFarmId: plan.id
+    // serverFarmId: plan.id
     enabled: true
     reserved: true
     isXenon: false
