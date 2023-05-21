@@ -183,63 +183,6 @@
                 ]
             },
             {
-                "name": "configuration-files",
-                "label": "Configuration and mapping files",
-                "elements": [
-                    {
-                        "name": "appsettings",
-                        "type": "Microsoft.Common.FileUpload",
-                        "label": "appsettings.json",
-                        "toolTip": "",
-                        "constraints": {
-                            "required": true,
-                            "accept": "appsettings.json"
-                        },
-                        "options": {
-                            "multiple": false,
-                            "uploadMode": "url",
-                            "openMode": "text",
-                            "encoding": "UTF-8"
-                        },
-                        "visible": true
-                    },
-                    {
-                        "name": "exportMappings",
-                        "type": "Microsoft.Common.FileUpload",
-                        "label": "Export mappings",
-                        "toolTip": "",
-                        "constraints": {
-                            "required": true,
-                            "accept": ".xml"
-                        },
-                        "options": {
-                            "multiple": true,
-                            "uploadMode": "url",
-                            "openMode": "text",
-                            "encoding": "UTF-8"
-                        },
-                        "visible": true
-                    },
-                    {
-                        "name": "apiMappings",
-                        "type": "Microsoft.Common.FileUpload",
-                        "label": "API mappings",
-                        "toolTip": "",
-                        "constraints": {
-                            "required": true,
-                            "accept": ".json"
-                        },
-                        "options": {
-                            "multiple": true,
-                            "uploadMode": "url",
-                            "openMode": "text",
-                            "encoding": "UTF-8"
-                        },
-                        "visible": true
-                    }
-                ]
-            },
-            {
                 "name": "tags",
                 "label": "Tags",
                 "elements": [
@@ -265,7 +208,7 @@
             "secret2Name": "[steps('Secrets').secret2Name]",
             "secret2Value": "[steps('Secrets').secret2Value]",
             "appsettingsFile": "[steps('configuration-files').appsettings]",
-            "exportMappingFiles" : "[steps('configuration-files').exportMappings]",
+            "exportMappingFiles": "[steps('configuration-files').exportMappings]",
             "apiMappingFiles": "[steps('configuration-files').apiMappings]"
         }
     }
